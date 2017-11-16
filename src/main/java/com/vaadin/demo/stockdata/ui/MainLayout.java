@@ -15,30 +15,41 @@
  */
 package com.vaadin.demo.stockdata.ui;
 
-import com.vaadin.router.RouterLayout;
-import com.vaadin.router.RouterLink;
-import com.vaadin.router.event.AfterNavigationEvent;
-import com.vaadin.router.event.AfterNavigationObserver;
-import com.vaadin.ui.Text;
+import com.vaadin.router.*;
+import com.vaadin.router.event.BeforeNavigationEvent;
 import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.html.Div;
-import com.vaadin.ui.html.H2;
-import com.vaadin.ui.icon.Icon;
-import com.vaadin.ui.icon.VaadinIcons;
 
 
 @HtmlImport("frontend://styles.html")
-public class MainLayout extends Div implements RouterLayout,
-        AfterNavigationObserver {
+@Route("")
+public class MainLayout extends Div implements HasUrlParameter<String>, HasDynamicTitle {
+
+    private final SearchField searchField;
+    private final StockList stockList;
+    private final AccountDetails accountDetails;
+    private final StockDetails stockDetails;
+
+    private String currentSymbol = "";
 
     public MainLayout() {
         addClassName("main-layout");
+
+        searchField = new SearchField();
+        stockList = new StockList();
+        accountDetails = new AccountDetails();
+        stockDetails = new StockDetails();
+
+        add(searchField, stockList, accountDetails, stockDetails);
     }
 
     @Override
-    public void afterNavigation(AfterNavigationEvent event) {
-        // updating the active menu item based on if either of views is active
-        // (note that this is triggered even for the error view)
-        String segment = event.getLocation().getFirstSegment();
+    public void setParameter(BeforeNavigationEvent event, @OptionalParameter String symbol) {
+        currentSymbol = symbol;
+    }
+
+    @Override
+    public String getPageTitle() {
+        return currentSymbol != null ? currentSymbol : "Portfolio" + " | Vaadin Stocks";
     }
 }
