@@ -9,6 +9,8 @@
     <packaging>war</packaging>
 
     <properties>
+        <speedment.enterprise.version>1.1.13</speedment.enterprise.version>
+        <speedment.license.key><!-- Insert key here --></speedment.license.key>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -51,7 +53,21 @@
             <id>webjars</id>
             <url>https://dl.bintray.com/webjars/maven</url>
         </repository>
+
+        <repository>
+            <id>speedment-enterprise</id>
+            <name>Speedment Enterprise Repositories</name>
+            <url>https://repo.speedment.com/nexus/content/repositories/releases/</url>
+        </repository>
     </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>speedment-enterprise</id>
+            <name>Speedment Enterprise Repositories</name>
+            <url>https://repo.speedment.com/nexus/content/repositories/releases/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencyManagement>
         <dependencies>
@@ -131,6 +147,28 @@
             <artifactId>paper-dialog</artifactId>
             <version>2.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.42</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.speedment.enterprise</groupId>
+            <artifactId>virtualcolumn-runtime</artifactId>
+            <version>${speedment.enterprise.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.speedment.enterprise</groupId>
+            <artifactId>datastore-runtime</artifactId>
+            <version>${speedment.enterprise.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.speedment.enterprise</groupId>
+            <artifactId>runtime</artifactId>
+            <version>${speedment.enterprise.version}</version>
+            <type>pom</type>
+        </dependency>
     </dependencies>
 
     <build>
@@ -187,6 +225,25 @@
                         </manifestEntries>
                     </archive>
                     <warSourceExcludes>**/node_modules/,**/node/,**/build/,**/etc/</warSourceExcludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.speedment.enterprise</groupId>
+                <artifactId>speedment-enterprise-maven-plugin</artifactId>
+                <version>${speedment.enterprise.version}</version>
+
+                <configuration>
+                    <components>
+                        <component>com.speedment.enterprise.virtualcolumn.tool.VirtualColumnToolBundle</component>
+                        <component>com.speedment.enterprise.datastore.tool.DataStoreToolBundle</component>
+                    </components>
+                    <parameters>
+                        <parameter>
+                            <name>licenseKey</name>
+                            <value>${speedment.license.key}</value>
+                        </parameter>
+                    </parameters>
                 </configuration>
             </plugin>
         </plugins>
