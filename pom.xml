@@ -10,7 +10,7 @@
 
     <properties>
         <speedment.enterprise.version>1.1.13</speedment.enterprise.version>
-        <speedment.license.key><!-- Insert key here --></speedment.license.key>
+        <speedment.license.key>BRyNdOMyy+hEWkR4ZGF0YXN0b3JlLGRiMixtc3NxbCxvcmFjbGUsdmlydHVhbC1jb2x1bW5zOxMv77xkTtQYpSV5abH3oJm9YgnQ8/3gXHLCncZWuSUuQ496ni5BvSKEcGrVaTpbq1ukzr0BmTQJBaQIWYnFrM+CAdVgF8NZhFrojCZ9P1KEk6syaHpoU8Mg2iJjrDqfJmUP5KR6GxomESf02GLYVB1pF23knuzT5n0U/HVaGo1q</speedment.license.key>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -168,6 +168,16 @@
             <artifactId>runtime</artifactId>
             <version>${speedment.enterprise.version}</version>
             <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>2.25.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>2.25.1</version>
         </dependency>
     </dependencies>
 
