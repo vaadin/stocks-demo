@@ -4,7 +4,7 @@ import com.vaadin.ui.grid.Grid;
 
 public class StockList extends Grid<Object> {
 
-    public StockList() {
-        addClassName("stock-list");
-    }
+  public StockList() {
+    addClassName("stock-list");
+  }
 }
