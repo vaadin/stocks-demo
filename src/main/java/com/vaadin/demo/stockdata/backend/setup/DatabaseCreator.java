@@ -5,13 +5,10 @@ import com.speedment.common.benchmark.internal.StopwatchImpl;
 import com.speedment.runtime.core.Speedment;
 import com.speedment.runtime.core.component.transaction.TransactionComponent;
 import com.speedment.runtime.core.component.transaction.TransactionHandler;
-import com.speedment.runtime.core.exception.SpeedmentException;
 import com.speedment.runtime.core.stream.parallel.ParallelStrategy;
 import com.vaadin.demo.stockdata.backend.db.StockdataApplicationBuilder;
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.data_point.DataPoint;
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.data_point.DataPointManager;
-import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.investmentdata.InvestmentDataImpl;
-import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.investmentdata.InvestmentDataManager;
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.symbol.Symbol;
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.symbol.SymbolImpl;
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.symbol.SymbolManager;
@@ -24,7 +21,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -68,14 +64,16 @@ public class DatabaseCreator implements AutoCloseable {
         final TransactionHandler txHandler = transactionComponent.createTransactionHandler();
 
         DataPointManager dataPoints = app.getOrThrow(DataPointManager.class);
-        final long symbolCount = app.getOrThrow(SymbolManager.class).stream().count();
         final AtomicLong realDataCount = new AtomicLong();
         final AtomicLong doneSymbols = new AtomicLong();
         final AtomicLong startedSymbols = new AtomicLong();
 
         wipeDatabase();
         final SymbolManager symbols = app.getOrThrow(SymbolManager.class);
+
         getNadaqSymbols().forEach(symbols::persist);
+
+        final long symbolCount = symbols.stream().count();
         System.out.println("Created " + symbols.stream().count() + " symbols.");
 
         final Stopwatch sw = new StopwatchImpl().start();
