@@ -42,27 +42,32 @@ class AlphaVantageClient {
     @SuppressWarnings("unchecked")
     private Map<String, Map<String, String>> getTimeSeries(String apiKey, Symbol symbol, Size size) {
         final String uri = String.format(REST_URI, symbol.getTicker(), apiKey, size.getRestOutputSize());
-        System.out.println("Trying " + uri);
-        try {
-            Map<String, Map> entries = client
-                .target(uri)
-                .request(MediaType.APPLICATION_JSON)
-                .get(new GenericType<Map<String, Map>>() {
-                });
-            return (Map<String, Map<String, String>>) entries.get(TIME_SERIES_KEY);
-        } catch (ResponseProcessingException e) {
-            System.out.println("Error for " + uri);
-            e.printStackTrace();
-            return Collections.emptyMap();
-        } catch (ServiceUnavailableException e) {
-            System.out.println("Service unavailable! Waiting.");
+
+        int retries = 12;
+        Exception lastException;
+        do {
             try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e1) {
+                Map<String, Map> entries = client
+                    .target(uri)
+                    .request(MediaType.APPLICATION_JSON)
+                    .get(new GenericType<Map<String, Map>>() {
+                    });
+                return (Map<String, Map<String, String>>) entries.get(TIME_SERIES_KEY);
+            } catch (ResponseProcessingException | ServiceUnavailableException e) {
+                lastException = e;
+            }
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
                 //  Just continue then
             }
-            return getTimeSeries(apiKey, symbol, size);
-        }
+        } while (--retries > 0);
+        System.out.println();
+        System.out.printf("Failed to get stock data for " + symbol.getName());
+        System.out.printf("URI: " + uri);
+        lastException.printStackTrace();
+        System.out.println();
+        return Collections.emptyMap();
     }
 
     Stream<DataPoint> getDataPoints(String apiKey, Symbol symbol) {

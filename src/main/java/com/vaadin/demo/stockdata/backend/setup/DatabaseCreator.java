@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -62,48 +63,29 @@ public class DatabaseCreator implements AutoCloseable {
         app.stop();
     }
 
-    private void setupDatabase() throws IOException {
-        DataPointManager dataPoints = app.getOrThrow(DataPointManager.class);
-        try {
-            final long count = dataPoints.stream().count();
-            System.out.println("Found " + count + " data points in database");
-            if (count == 0) {
-                System.out.println("Fetching real data points");
-                populateDatabaseRealData();
-            }
-            try {
-                extrapolateDataPoints();
-            } catch (SpeedmentException e) {
-                e.printStackTrace();
-            }
-            System.out.println("Database now has " + dataPoints.stream().count() + " data points");
-        } catch (SpeedmentException e) {
-            System.out.println("Database schema missing or malformed, recreating");
-            wipeDatabase();
-            setupDatabase();
-        }
-    }
-
-    private void extrapolateDataPoints() {
+    private void clearAndPopulate() throws IOException {
         final TransactionComponent transactionComponent = app.getOrThrow(TransactionComponent.class);
         final TransactionHandler txHandler = transactionComponent.createTransactionHandler();
 
-        final DataPointManager dataPoints = app.getOrThrow(DataPointManager.class);
+        DataPointManager dataPoints = app.getOrThrow(DataPointManager.class);
+        final long symbolCount = app.getOrThrow(SymbolManager.class).stream().count();
+        final AtomicLong realDataCount = new AtomicLong();
+        final AtomicLong doneSymbols = new AtomicLong();
+        final AtomicLong startedSymbols = new AtomicLong();
+
+        wipeDatabase();
+        final SymbolManager symbols = app.getOrThrow(SymbolManager.class);
+        getNadaqSymbols().forEach(symbols::persist);
+        System.out.println("Created " + symbols.stream().count() + " symbols.");
 
         final Stopwatch sw = new StopwatchImpl().start();
-
-        long symbolCount = app.getOrThrow(SymbolManager.class).stream().count();
-        AtomicLong doneSymbols = new AtomicLong();
-        AtomicLong startedSymbols = new AtomicLong();
-
-        System.out.println("Extrapolating data points <done/started/all>");
-
         Consumer<Long> progressConsumer = progress -> {
             final long time = sw.elapsedMillis();
             long pointsPerS = progress * 1000 / time;
             synchronized (this) {
-                System.out.format("\r Points: %d (%d points/s) <%d/%d/%d>",
+                System.out.format("\r Points: %d (%d real) (%d points/s) <%d/%d/%d>      ",
                     progress,
+                    realDataCount.get(),
                     pointsPerS,
                     doneSymbols.get(),
                     startedSymbols.get(),
@@ -111,56 +93,10 @@ public class DatabaseCreator implements AutoCloseable {
                 System.out.flush();
             }
         };
-        CachingPersister<DataPoint> persister = new CachingPersister<>(txHandler, dataPoints, progressConsumer);
+        final CachingPersister<DataPoint> persister = new CachingPersister<>(txHandler, dataPoints, progressConsumer);
+        final AlphaVantageClient stockClient = new AlphaVantageClient();
 
-        app.configure(SymbolManager.class)
-            .withParallelStrategy(ParallelStrategy.computeIntensityExtreme())
-            .build()
-            .stream()
-            .parallel()
-            .forEach(symbol -> {
-                final List<DataPoint> existingPoints = dataPoints.stream()
-                    .filter(DataPoint.SYMBOL_ID.equal(symbol.getId()))
-                    .sorted(Comparator.comparing(DataPoint::getTimeStamp))
-                    .collect(toList());
-
-                startedSymbols.incrementAndGet();
-                DataPointExtrapolator.extrapolate(existingPoints, extrapolateStep)
-                    .parallel()
-                    .forEach(persister);
-                doneSymbols.incrementAndGet();
-
-                progressConsumer.accept(persister.getCount());
-            });
-
-        persister.flush();
-        System.out.println();
-    }
-
-    private void populateDatabaseRealData() throws IOException {
-        final TransactionComponent transactionComponent = app.getOrThrow(TransactionComponent.class);
-        final TransactionHandler txHandler = transactionComponent.createTransactionHandler();
-
-        SymbolManager symbols = app.getOrThrow(SymbolManager.class);
-        InvestmentDataManager investments = app.getOrThrow(InvestmentDataManager.class);
-        DataPointManager dataPoints = app.getOrThrow(DataPointManager.class);
-
-        //getNadaqSymbols().stream().skip(100).limit(10).forEach(symbols::persist);  //  For a smaller database
-
-        getNadaqSymbols().forEach(symbols::persist);
-        System.out.println("Created " + symbols.stream().count() + " symbols.");
-
-        investments.persist(new InvestmentDataImpl().setQuantity(1000).setSymbolId(1));
-        investments.persist(new InvestmentDataImpl().setQuantity(2000).setSymbolId(2));
-
-        AlphaVantageClient stockClient = new AlphaVantageClient();
-
-        Consumer<Long> progressConsumer = progress -> {
-            synchronized (app) {
-                System.out.println("Stored a total of " + progress + " data points.");
-            }
-        };
-        CachingPersister<DataPoint> persister = new CachingPersister<>(txHandler, dataPoints, progressConsumer);
+        System.out.println("Fetching and extrapolating data points for symbols: <done/started/all>");
 
         app.configure(SymbolManager.class)
             .withParallelStrategy(ParallelStrategy.computeIntensityExtreme())
@@ -168,20 +104,27 @@ public class DatabaseCreator implements AutoCloseable {
             .stream()
             .parallel()
             .forEach( symbol -> {
-                synchronized (app) {
-                    System.out.println("Fetching trade info for " + symbol.getName());
-                }
-                AtomicLong count = new AtomicLong();
-                stockClient.getDataPoints(apiKey, symbol)
-                    .peek($ -> count.incrementAndGet())
+                startedSymbols.incrementAndGet();
+
+                List<DataPoint> realData = stockClient.getDataPoints(apiKey, symbol)
+                    .sorted(DataPoint.TIME_STAMP.comparator())
+                    .collect(Collectors.toList());
+
+                realDataCount.addAndGet(realData.size());
+                realData.forEach(persister);
+
+                DataPointExtrapolator.extrapolate(realData, extrapolateStep)
+                    .parallel()
                     .forEach(persister);
-                synchronized (app) {
-                    System.out.println("Fetched " + count.get() + " data points for " + symbol.getName());
-                }
+
+                doneSymbols.incrementAndGet();
+
+                progressConsumer.accept(persister.getCount());
             });
 
         persister.flush();
     }
+
 
     private Speedment createApp() {
         return new StockdataApplicationBuilder()
@@ -252,7 +195,6 @@ public class DatabaseCreator implements AutoCloseable {
         }
     }
 
-
     private static void usage() {
         System.out.println("Usage: <ip address> <user> <password> <interval> <api key>");
         System.out.println("       <ip address>: IP address of MySQL host");
@@ -296,7 +238,7 @@ public class DatabaseCreator implements AutoCloseable {
         }
 
         try (final DatabaseCreator creator = new DatabaseCreator(hostIp, user, password, interval, apiKey)) {
-            creator.setupDatabase();
+            creator.clearAndPopulate();
         }
     }
 }

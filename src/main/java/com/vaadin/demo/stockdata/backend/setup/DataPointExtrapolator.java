@@ -11,17 +11,17 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 class DataPointExtrapolator implements Spliterator<DataPoint> {
-    private final List<DataPoint> givenPoints;
+    private final List<DataPoint> realPoints;
     private final Random random;
-    private int lastPos;
-    private int symbolId;
+    private int realPos;
+    private int lastRealPos;
+    final private int symbolId;
     private DataPoint left;
     private DataPoint right;
     private long timeDelta;
-    private float highDelta;
-    private float lowDelta;
+    private long highDelta;
+    private long lowDelta;
     private long timeForNextPoint;
-    private int nextGivenPos;
     final private long extrapolateStep;
     private double trend;
     private long lastClose;
@@ -40,43 +40,57 @@ class DataPointExtrapolator implements Spliterator<DataPoint> {
     }
 
 
-    private DataPointExtrapolator(int startPos, int lastPos, List<DataPoint> givenPoints, long extrapolateStep) {
-        this.givenPoints = givenPoints;
+    private DataPointExtrapolator(int startPos, int endPos, List<DataPoint> realPoints, long extrapolateStep) {
+        this.realPoints = realPoints;
         this.extrapolateStep = extrapolateStep;
-        computeDeltas(givenPoints.get(startPos), givenPoints.get(startPos + 1));
-        nextGivenPos = startPos + 2;
-        this.lastPos = lastPos;
-        symbolId = left.getSymbolId();
+        this.lastRealPos = endPos;
         random = new Random();
+        symbolId = realPoints.get(startPos).getSymbolId();
+        realPos = startPos;
+        findNextTimePoint();
     }
 
-    private void computeDeltas(DataPoint left, DataPoint right) {
-        this.left = left;
-        this.right = right;
-        timeDelta = right.getTimeStamp() - left.getTimeStamp();
-        highDelta = (right.getHigh() - left.getHigh());
-        lowDelta = (right.getLow() - left.getLow());
-        lastClose = left.getClose();
-        timeForNextPoint = left.getTimeStamp() + extrapolateStep;
+    private void findNextTimePoint() {
+        while (realPos < lastRealPos) {
+            left = realPoints.get(realPos);
+            right = realPoints.get(realPos + 1);
+            timeForNextPoint = left.getTimeStamp() + extrapolateStep;
+            if (timeForNextPoint < right.getTimeStamp()) {
+                timeDelta = right.getTimeStamp() - left.getTimeStamp();
+                highDelta = right.getHigh() - left.getHigh();
+                lowDelta = right.getLow() - left.getLow();
+                lastClose = left.getClose();
+                return;
+            } else {
+                realPos++;
+            }
+        }
+
+        // No more real points
+        left = realPoints.get(lastRealPos);
+        timeForNextPoint = left.getTimeStamp();
+        right = left;
     }
 
     @Override
     public boolean tryAdvance(Consumer<? super DataPoint> action) {
         while (timeForNextPoint >= right.getTimeStamp()) {
-            if (nextGivenPos <= lastPos) {
-                computeDeltas(right, givenPoints.get(nextGivenPos++));
+            if (realPos < lastRealPos) {
+                realPos++;
+                findNextTimePoint();
             } else {
                 return false;
             }
         }
 
-        action.accept(createNextDataPoint((float)(timeForNextPoint - left.getTimeStamp()) / timeDelta));
+        action.accept(createNextDataPoint(timeForNextPoint));
         timeForNextPoint += extrapolateStep;
         return true;
     }
 
-    private DataPoint createNextDataPoint(float factor) {
-        DataPoint next = new DataPointImpl().setSymbolId(symbolId).setTimeStamp(timeForNextPoint);
+    private DataPoint createNextDataPoint(long time) {
+        DataPoint next = new DataPointImpl().setSymbolId(symbolId).setTimeStamp(time);
+        final float factor = (float)(time - left.getTimeStamp()) / timeDelta;
         next.setHigh(left.getHigh() + (long) (highDelta * factor));
         next.setLow(left.getLow() + (long) (lowDelta * factor));
         trend += random.nextFloat() - 0.5;
@@ -96,10 +110,11 @@ class DataPointExtrapolator implements Spliterator<DataPoint> {
 
     @Override
     public Spliterator<DataPoint> trySplit() {
-        if (lastPos - nextGivenPos > 1) {
-            final int mid = (lastPos - nextGivenPos) / 2 + nextGivenPos;
-            final DataPointExtrapolator other = new DataPointExtrapolator(mid, lastPos, givenPoints, extrapolateStep);
-            lastPos = mid;
+        final int givenLeft = lastRealPos - realPos;
+        if (givenLeft > 1) {
+            final int mid = realPos + givenLeft / 2;
+            final DataPointExtrapolator other = new DataPointExtrapolator(mid, lastRealPos, realPoints, extrapolateStep);
+            lastRealPos = mid;
             return other;
         } else {
             return null;
@@ -108,7 +123,7 @@ class DataPointExtrapolator implements Spliterator<DataPoint> {
 
     @Override
     public long estimateSize() {
-        return lastPos - nextGivenPos;
+        return lastRealPos - realPos;
     }
 
     @Override

@@ -36,11 +36,11 @@ class CachingPersister<T> implements Consumer<T> {
         if (!cache.offer(entity)) {
             ArrayBlockingQueue<T> fullCache;
             synchronized (this) {
-                if (cache.offer(entity)) {  // Perhaps someone else solved the problem while we waited for the monitor
-                    fullCache = null;
-                } else {
+                if (!cache.offer(entity)) {
                     fullCache = cache;
                     createNewQueue();
+                } else {  // Someone else solved the problem while we waited for the monitor
+                    fullCache = null;
                 }
             }
             if (fullCache != null) {

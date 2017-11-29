@@ -15,6 +15,6 @@ PASSWORD="root"
 # This number controls the size of the final database
 EXTRAPOLATE_INTERVAL=60
 
-echo "Connecting to ${HOST} with used ${USER}, will extrapolate data to get points every ${EXTRAPOLATE_INTERVAL} seconds."
+echo "Connecting to ${HOST} with user ${USER}, will extrapolate data to get points every ${EXTRAPOLATE_INTERVAL} seconds."
 
 mvn -q package exec:java -Dexec.mainClass=com.vaadin.demo.stockdata.backend.setup.DatabaseCreator -Dexec.args="${HOST} ${USER} ${PASSWORD} ${EXTRAPOLATE_INTERVAL} ${API_KEY}"
