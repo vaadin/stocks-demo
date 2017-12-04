@@ -19,6 +19,7 @@
 
         <!-- Dependencies -->
         <vaadin.project.version>10.0.0.alpha8</vaadin.project.version>
+        <vaadin.charts.version>6.0.0.alpha3</vaadin.charts.version>
         <!-- Needed for production mode -->
         <flow.project.version>1.0.0.alpha11</flow.project.version>
         <servlet.api.version>3.1.0</servlet.api.version>
@@ -91,6 +92,12 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin</artifactId>
             <version>${vaadin.project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-charts-flow</artifactId>
+            <version>${vaadin.charts.version}</version>
         </dependency>
 
         <dependency>

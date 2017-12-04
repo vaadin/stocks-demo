@@ -36,11 +36,18 @@
       display:none
     }
 
-    .main-layout {
+    vaadin-license-dialog,
+    vaadin-license-box {
+      display: none;
+    }
+
+    .stocks-app {
       display: grid;
-      grid-template-columns: auto;
-      grid-template-rows: 64px auto;
+      height: 100vh;
+      padding: 10px;
       grid-gap: 10px;
+      grid-template-columns: 1fr;
+      grid-template-rows: 64px 1fr;
       grid-template-areas:
         "search details"
         "main main";
@@ -48,10 +55,14 @@
 
     .search-field {
       grid-area: search;
+      align-self: center;
+      width: 100%;
     }
 
     .account-details {
       grid-area: details;
+      align-self: center;
+      justify-self: right;
     }
 
     .stock-list {
@@ -64,9 +75,9 @@
     }
 
     @media (min-width: 1000px) {
-      .main-layout {
-        grid-template-columns: 300px auto;
-        grid-template-rows: 64px auto;
+      .stocks-app {
+        grid-template-columns: 300px 1fr;
+        grid-template-rows: 64px 1fr;
         grid-template-areas:
             "search details"
             "list main";
@@ -74,9 +85,11 @@
 
       .stock-list {
         grid-area: list;
+        height: calc(100vh - 94px);
       }
 
-      .stock-list {
+      .stock-list,
+      .stock-details {
         display: flex;
       }
     }

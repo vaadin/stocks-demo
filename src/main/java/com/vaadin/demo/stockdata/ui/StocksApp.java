@@ -15,26 +15,29 @@
  */
 package com.vaadin.demo.stockdata.ui;
 
-import com.vaadin.router.*;
-import com.vaadin.router.event.BeforeNavigationEvent;
+import com.vaadin.router.PageTitle;
+import com.vaadin.router.Route;
 import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.html.Div;
 
 
-@HtmlImport("frontend://styles.html")
 @Route("")
-public class MainLayout extends Div implements HasUrlParameter<String>, HasDynamicTitle {
+@HtmlImport("frontend://styles.html")
+@PageTitle("Vaadin Stocks")
+public class StocksApp extends Div {
 
-    private final SearchField searchField;
-    private final StockList stockList;
-    private final AccountDetails accountDetails;
-    private final StockDetails stockDetails;
+    private SearchField searchField;
+    private StockList stockList;
+    private StockDetails stockDetails;
+    private AccountDetails accountDetails;
 
-    private String currentSymbol = "";
+    public StocksApp() {
+        addClassName("stocks-app");
+        setupLayout();
+        addListeners();
+    }
 
-    public MainLayout() {
-        addClassName("main-layout");
-
+    private void setupLayout() {
         searchField = new SearchField();
         stockList = new StockList();
         accountDetails = new AccountDetails();
@@ -43,13 +46,18 @@ public class MainLayout extends Div implements HasUrlParameter<String>, HasDynam
         add(searchField, stockList, accountDetails, stockDetails);
     }
 
-    @Override
-    public void setParameter(BeforeNavigationEvent event, @OptionalParameter String symbol) {
-        currentSymbol = symbol;
+    private void addListeners() {
+        searchField.addValueChangeListener(change ->
+                stockList.filter(change.getValue()));
+
+        stockList.addSelectionListener(evt -> {
+
+            stockDetails.setVisible(evt.getFirstSelectedItem().isPresent());
+
+            evt.getFirstSelectedItem().ifPresent(s ->
+                            stockDetails.setSymbol(s.getSymbol()));
+            }
+        );
     }
 
-    @Override
-    public String getPageTitle() {
-        return currentSymbol != null ? currentSymbol : "Portfolio" + " | Vaadin Stocks";
-    }
 }

@@ -1,0 +1,92 @@
+<link rel="import" href="bower_components/polymer/polymer-element.html">
+<link rel="import" href="bower_components/vaadin-charts/vaadin-chart.html">
+<dom-module id="sparkline-chart">
+  <template>
+
+    <vaadin-chart id="chart">
+      <vaadin-chart-series values="[[values]]"></vaadin-chart-series>
+    </vaadin-chart>
+  </template>
+  <script>
+    class SparklineChart extends Polymer.Element {
+      static get is() {
+        return 'sparkline-chart'
+      }
+
+      static get properties() {
+        return {
+          values: Array
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log('Updating sparkline chart');
+        this.$.chart.update({
+          chart: {
+            backgroundColor: null,
+            borderWidth: 0,
+            type: 'line',
+            margin: [2, 0, 2, 0],
+            width: 120,
+            height: 20,
+            style: {
+              overflow: 'visible'
+            },
+            skipClone: true
+          },
+          title: {
+            text: ''
+          },
+          credits: {
+            enabled: false
+          },
+          xAxis: {
+            labels: {
+              enabled: false
+            },
+            title: {
+              text: null
+            },
+            startOnTick: false,
+            endOnTick: false,
+            tickPositions: []
+          },
+          yAxis: {
+            endOnTick: false,
+            startOnTick: false,
+            labels: {
+              enabled: false
+            },
+            title: {
+              text: null
+            },
+            tickPositions: [0]
+          },
+          legend: {
+            enabled: false
+          },
+          exporting: {
+            enabled: false
+          },
+          tooltip: {
+            enabled: false
+          },
+          plotOptions: {
+            series: {
+              animation: false,
+              lineWidth: 1,
+              shadow: false,
+              fillOpacity: 0.25,
+              marker: {
+                enabled: false
+              }
+            }
+          }
+        });
+      }
+    }
+
+    customElements.define(SparklineChart.is, SparklineChart);
+  </script>
+</dom-module>
