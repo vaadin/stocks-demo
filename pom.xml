@@ -10,7 +10,7 @@
 
     <properties>
         <speedment.enterprise.version>1.1.13</speedment.enterprise.version>
-        <speedment.license.key>BRyNdOMyy+hEWkR4ZGF0YXN0b3JlLGRiMixtc3NxbCxvcmFjbGUsdmlydHVhbC1jb2x1bW5zOxMv77xkTtQYpSV5abH3oJm9YgnQ8/3gXHLCncZWuSUuQ496ni5BvSKEcGrVaTpbq1ukzr0BmTQJBaQIWYnFrM+CAdVgF8NZhFrojCZ9P1KEk6syaHpoU8Mg2iJjrDqfJmUP5KR6GxomESf02GLYVB1pF23knuzT5n0U/HVaGo1q</speedment.license.key>
+        <speedment.license.key>HhD32Q3KophEmEYFYXBpLW1hbmFnZXIsZGF0YXN0b3JlLGRiMixtc3NxbCxvcmFjbGUscmVhY3Rvcix2aXJ0dWFsLWNvbHVtbnM7PG7WjvzDDv08zjh1gSR7EzdSBlFloOYuvMGIz1/+gsGClX0w/u9o+5hl6I6lVgz20/HP8K81NGHUUiU+lW/Hf3wM4RJybQ6be9OjgKa86aDwjXGGi8k8J/CzAx/vk7YZMUSXp1pRTxrRoRT7FpkHg0sKH2qM2kTR6tyfph8mC5I=</speedment.license.key>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,10 +18,10 @@
         <failOnMissingWebXml>false</failOnMissingWebXml>
 
         <!-- Dependencies -->
-        <vaadin.project.version>10.0.0.alpha8</vaadin.project.version>
+        <vaadin.project.version>10.0.0.alpha9</vaadin.project.version>
         <vaadin.charts.version>6.0.0.alpha3</vaadin.charts.version>
         <!-- Needed for production mode -->
-        <flow.project.version>1.0.0.alpha11</flow.project.version>
+        <flow.project.version>1.0.0.alpha13</flow.project.version>
         <servlet.api.version>3.1.0</servlet.api.version>
         <selenium.server.version>3.4.0</selenium.server.version>
 
@@ -98,6 +98,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-charts-flow</artifactId>
             <version>${vaadin.charts.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-charts-webjar</artifactId>
+            <version>6.0.0-alpha5</version>
         </dependency>
 
         <dependency>
