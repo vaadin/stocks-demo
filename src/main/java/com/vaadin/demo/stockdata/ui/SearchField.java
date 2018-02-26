@@ -1,8 +1,8 @@
 package com.vaadin.demo.stockdata.ui;
 
-import com.vaadin.ui.icon.Icon;
-import com.vaadin.ui.icon.VaadinIcons;
-import com.vaadin.ui.textfield.TextField;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcons;
+import com.vaadin.flow.component.textfield.TextField;
 
 public class SearchField extends TextField {
 

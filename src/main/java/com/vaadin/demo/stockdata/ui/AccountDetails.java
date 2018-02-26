@@ -1,12 +1,8 @@
 package com.vaadin.demo.stockdata.ui;
 
-import com.vaadin.ui.html.Div;
-import com.vaadin.ui.icon.Icon;
-import com.vaadin.ui.icon.VaadinIcons;
-
-import java.math.BigDecimal;
-import java.text.NumberFormat;
-import java.util.Locale;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcons;
 
 public class AccountDetails extends Div {
 

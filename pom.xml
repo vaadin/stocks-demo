@@ -5,7 +5,7 @@
     <groupId>com.vaadin.demo</groupId>
     <artifactId>stock-data</artifactId>
     <name>Stock Data Demo</name>
-    <version>1.0.0.alpha7</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <properties>
@@ -18,43 +18,14 @@
         <failOnMissingWebXml>false</failOnMissingWebXml>
 
         <!-- Dependencies -->
-        <vaadin.project.version>10.0.0.alpha9</vaadin.project.version>
-        <vaadin.charts.version>6.0.0.alpha3</vaadin.charts.version>
-        <!-- Needed for production mode -->
-        <flow.project.version>1.0.0.alpha13</flow.project.version>
-        <servlet.api.version>3.1.0</servlet.api.version>
-        <selenium.server.version>3.4.0</selenium.server.version>
+        <vaadin.version>10.0.0.alpha21</vaadin.version>
 
         <!-- Plugins -->
-        <frontend.maven.plugin.version>1.5</frontend.maven.plugin.version>
         <jetty.version>9.3.7.v20160115</jetty.version>
-        <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
         <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
-
-        <!-- Frontend -->
-        <node.version>v7.10.1</node.version>
-        <npm.version>5.3.0</npm.version>
-
-        <frontend.working.directory>${project.basedir}/src/main/webapp/frontend</frontend.working.directory>
-        <jetty.extra.resource.base>${project.basedir}/src/main/webapp/</jetty.extra.resource.base>
     </properties>
 
     <repositories>
-        <repository>
-            <id>flow-internal-release</id>
-            <url>https://repo.vaadin.com/nexus/content/repositories/flow</url>
-        </repository>
-
-        <repository>
-            <id>vaadin-addons</id>
-            <url>http://maven.vaadin.com/vaadin-addons</url>
-        </repository>
-
-        <repository>
-            <id>webjars</id>
-            <url>https://dl.bintray.com/webjars/maven</url>
-        </repository>
-
         <repository>
             <id>speedment-enterprise</id>
             <name>Speedment Enterprise Repositories</name>
@@ -69,6 +40,10 @@
 
     <pluginRepositories>
         <pluginRepository>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+        </pluginRepository>
+        <pluginRepository>
             <id>speedment-enterprise</id>
             <name>Speedment Enterprise Repositories</name>
             <url>https://repo.speedment.com/nexus/content/repositories/releases/</url>
@@ -79,10 +54,10 @@
         <dependencies>
             <dependency>
                 <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-webjars-bom</artifactId>
+                <artifactId>vaadin-bom</artifactId>
                 <type>pom</type>
                 <scope>import</scope>
-                <version>${flow.project.version}</version>
+                <version>${vaadin.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -91,57 +66,21 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin</artifactId>
-            <version>${vaadin.project.version}</version>
+            <version>${vaadin.version}</version>
         </dependency>
 
+        <!-- Added to provide logging output as Flow uses -->
+        <!-- the unbound SLF4J no-operation (NOP) logger implementation -->
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-charts-flow</artifactId>
-            <version>${vaadin.charts.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-charts-webjar</artifactId>
-            <version>6.0.0-alpha5</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
         </dependency>
 
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>${servlet.api.version}</version>
+            <version>3.1.0</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-            <version>1.9.2</version>
-            <type>jar</type>
-        </dependency>
-
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-server</artifactId>
-            <version>${flow.project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-push</artifactId>
-            <version>${flow.project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-client</artifactId>
-            <version>${flow.project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-data</artifactId>
-            <version>${flow.project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.webjars.bower</groupId>
-            <artifactId>vaadin-valo-theme</artifactId>
         </dependency>
 
         <dependency>
@@ -182,46 +121,6 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>${maven.clean.plugin.version}</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>${frontend.working.directory}/bower_components</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>${frontend.working.directory}/build</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>${frontend.working.directory}/node</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>${frontend.working.directory}/node_modules</directory>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>${jetty.version}</version>
-                <configuration>
-                    <scanIntervalSeconds>-1</scanIntervalSeconds>
-                    <stopPort>8081</stopPort>
-                    <stopWait>5</stopWait>
-                    <stopKey>foo</stopKey>
-                    <webAppConfig>
-                        <containerIncludeJarPattern>^$</containerIncludeJarPattern>
-                        <resourceBases>
-                            <resourceBase>${jetty.extra.resource.base}</resourceBase>
-                        </resourceBases>
-                    </webAppConfig>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>${maven.war.plugin.version}</version>
                 <configuration>
@@ -231,8 +130,13 @@
                             <Implementation-Version>${project.version}</Implementation-Version>
                         </manifestEntries>
                     </archive>
-                    <warSourceExcludes>**/node_modules/,**/node/,**/build/,**/etc/</warSourceExcludes>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>${jetty.version}</version>
             </plugin>
 
             <plugin>
@@ -293,43 +197,30 @@
             </activation>
 
             <properties>
-                <jetty.extra.resource.base>${project.basedir}/src/main/webapp/frontend/build</jetty.extra.resource.base>
+                <transpilation.output>${project.build.directory}/build</transpilation.output>
             </properties>
 
             <dependencies>
                 <dependency>
                     <groupId>com.vaadin</groupId>
                     <artifactId>flow-server-production-mode</artifactId>
-                    <version>${flow.project.version}</version>
                 </dependency>
             </dependencies>
 
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>com.github.eirslett</groupId>
-                        <artifactId>frontend-maven-plugin</artifactId>
-                        <version>${frontend.maven.plugin.version}</version>
-                        <configuration>
-                            <nodeVersion>${node.version}</nodeVersion>
-                            <npmVersion>${npm.version}</npmVersion>
-                            <workingDirectory>${frontend.working.directory}</workingDirectory>
-                        </configuration>
+                        <groupId>com.vaadin</groupId>
+                        <artifactId>flow-maven-plugin</artifactId>
+                        <version>1.0.0.alpha21</version>
                         <executions>
                             <execution>
-                                <id>install-node-and-npm</id>
                                 <goals>
-                                    <goal>install-node-and-npm</goal>
-                                    <goal>npm</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>npm run</id>
-                                <goals>
-                                    <goal>npm</goal>
+                                    <goal>copy-production-files</goal>
+                                    <goal>package-for-production</goal>
                                 </goals>
                                 <configuration>
-                                    <arguments>run prodMode</arguments>
+                                    <transpileOutputDirectory>${transpilation.output}</transpileOutputDirectory>
                                 </configuration>
                             </execution>
                         </executions>
@@ -340,12 +231,30 @@
                         <artifactId>maven-war-plugin</artifactId>
                         <version>${maven.war.plugin.version}</version>
                         <configuration>
+                            <archive>
+                                <manifestEntries>
+                                    <Implementation-Title>${project.name}</Implementation-Title>
+                                    <Implementation-Version>${project.version}</Implementation-Version>
+                                </manifestEntries>
+                            </archive>
                             <webResources>
                                 <resource>
-                                    <directory>${frontend.working.directory}/build</directory>
+                                    <directory>${transpilation.output}</directory>
                                 </resource>
                             </webResources>
-                            <warSourceExcludes>**/frontend/bower_components/,**/node_modules/,**/node/,**/build/,**/etc/</warSourceExcludes>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <version>${jetty.version}</version>
+                        <configuration>
+                            <webAppConfig>
+                                <resourceBases>
+                                    <resourceBase>${transpilation.output}</resourceBase>
+                                </resourceBases>
+                            </webAppConfig>
                         </configuration>
                     </plugin>
                 </plugins>

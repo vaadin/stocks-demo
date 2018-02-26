@@ -1,26 +1,17 @@
 package com.vaadin.demo.stockdata.ui;
 
-import com.vaadin.addon.charts.model.OhlcItem;
-import com.vaadin.addon.charts.model.style.Color;
-import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.data_point.DataPoint;
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.symbol.Symbol;
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.symbol.generated.GeneratedSymbol;
 import com.vaadin.demo.stockdata.backend.service.Service;
-import com.vaadin.flow.model.Convert;
-import com.vaadin.flow.model.Exclude;
-import com.vaadin.flow.model.TemplateModel;
-import com.vaadin.ui.Tag;
-import com.vaadin.ui.common.ClientDelegate;
-import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.polymertemplate.PolymerTemplate;
+import com.vaadin.flow.component.ClientDelegate;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
+import com.vaadin.flow.templatemodel.TemplateModel;
 
-import java.awt.*;
-import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Tag("stock-details")

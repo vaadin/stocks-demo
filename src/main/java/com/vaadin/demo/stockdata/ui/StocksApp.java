@@ -15,15 +15,18 @@
  */
 package com.vaadin.demo.stockdata.ui;
 
-import com.vaadin.router.PageTitle;
-import com.vaadin.router.Route;
-import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.html.Div;
+import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.lumo.Lumo;
 
 
 @Route("")
-@HtmlImport("frontend://styles.html")
+@StyleSheet("frontend://styles.css")
 @PageTitle("Vaadin Stocks")
+@Theme(Lumo.class)
 public class StocksApp extends Div {
 
     private SearchField searchField;
