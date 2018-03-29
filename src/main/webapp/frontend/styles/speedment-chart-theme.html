@@ -1,0 +1,26 @@
+<link rel="import" href="bower_components/vaadin-charts/vaadin-chart-default-theme.html">
+
+<!--Shared styles for all charts-->
+<dom-module id="speedment-chart-theme" theme-for="vaadin-chart">
+  <template>
+    <style include="vaadin-chart-default-theme">
+      :host(.appreciating) .highcharts-color-0, :host(.appreciating) .highcharts-navigator-series {
+        fill: #00dd00cc;
+        stroke: #00dd00cc;
+      }
+
+      :host(.declining) .highcharts-color-0, :host(.declining) .highcharts-navigator-series {
+        fill: #ff0000cc;
+        stroke: #ff0000cc;
+      }
+
+      :host(.appreciating) .highcharts-navigator-mask-inside {
+        fill: #00dd00cc;
+      }
+
+      :host(.declining) .highcharts-navigator-mask-inside {
+        fill: #ff0000cc;
+      }
+    </style>
+  </template>
+</dom-module>

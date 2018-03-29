@@ -1,29 +1,47 @@
 <link rel="import" href="bower_components/polymer/polymer-element.html">
 <link rel="import" href="bower_components/vaadin-charts/vaadin-chart.html">
+<link rel="import" href="speedment-chart-theme.html">
+
+<!--New custom element extending ChartElement for performance reason (spark configuration is only sent to the client once)-->
+<!--and after that sparkline can just be sent as template from flow without using a component renderer.-->
+<!--This also makes it easier to style with CSS without requiring JS.-->
 <dom-module id="sparkline-chart">
   <template>
+    <style include="speedment-chart-theme">
+      .highcharts-axis, .highcharts-grid, .highcharts-markers, .highcharts-tracker, .highcharts-background {
+        display: none;
+      }
 
-    <vaadin-chart id="chart">
-      <vaadin-chart-series values="[[values]]"></vaadin-chart-series>
-    </vaadin-chart>
+      .highcharts-graph {
+        stroke-width: 1px;
+      }
+
+      .highcharts-graph:hover {
+        animation: breathe 5s ease-out infinite;
+      }
+
+      @keyframes breathe {
+        0% { stroke-width: 1px }
+        40% { stroke-width: 3px }
+        60% { stroke-width: 3px }
+        100% { stroke-width: 1px }
+      }
+    </style>
+
+    <div id="chart"></div>
+    <slot id="slot"></slot>
   </template>
+
   <script>
-    class SparklineChart extends Polymer.Element {
+    class SparklineElement extends window.Vaadin.ChartElement {
       static get is() {
         return 'sparkline-chart'
       }
 
-      static get properties() {
-        return {
-          values: Array
-        };
-      }
-
-      ready() {
-        super.ready();
-        console.log('Updating sparkline chart');
-        this.$.chart.update({
+      connectedCallback() {
+        this.update({
           chart: {
+            animation: false,
             backgroundColor: null,
             borderWidth: 0,
             type: 'line',
@@ -84,9 +102,10 @@
             }
           }
         });
+        super.connectedCallback();
       }
     }
 
-    customElements.define(SparklineChart.is, SparklineChart);
+    customElements.define(SparklineElement.is, SparklineElement);
   </script>
 </dom-module>

@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.vaadin.demo</groupId>
-    <artifactId>stock-data</artifactId>
-    <name>Stock Data Demo</name>
+    <artifactId>stocks_demo</artifactId>
+    <name>Stocks Demo</name>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <properties>
-        <speedment.enterprise.version>1.1.13</speedment.enterprise.version>
-        <speedment.license.key>HhD32Q3KophEmEYFYXBpLW1hbmFnZXIsZGF0YXN0b3JlLGRiMixtc3NxbCxvcmFjbGUscmVhY3Rvcix2aXJ0dWFsLWNvbHVtbnM7PG7WjvzDDv08zjh1gSR7EzdSBlFloOYuvMGIz1/+gsGClX0w/u9o+5hl6I6lVgz20/HP8K81NGHUUiU+lW/Hf3wM4RJybQ6be9OjgKa86aDwjXGGi8k8J/CzAx/vk7YZMUSXp1pRTxrRoRT7FpkHg0sKH2qM2kTR6tyfph8mC5I=</speedment.license.key>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,8 +17,9 @@
         <failOnMissingWebXml>false</failOnMissingWebXml>
 
         <!-- Dependencies -->
-        <vaadin.version>10.0.0.alpha21</vaadin.version>
-
+        <vaadin.version>10.0.0.beta4</vaadin.version>
+        <speedment.enterprise.version>1.1.13</speedment.enterprise.version>
+        <vaadin.charts.version>LATEST</vaadin.charts.version>
         <!-- Plugins -->
         <jetty.version>9.3.7.v20160115</jetty.version>
         <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
@@ -27,14 +27,17 @@
 
     <repositories>
         <repository>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+        </repository>
+        <repository>
+            <id>vaadin-addons</id>
+            <url>http://maven.vaadin.com/vaadin-addons</url>
+        </repository>
+        <repository>
             <id>speedment-enterprise</id>
             <name>Speedment Enterprise Repositories</name>
             <url>https://repo.speedment.com/nexus/content/repositories/releases/</url>
-        </repository>
-
-        <repository>
-            <id>vaadin-prereleases</id>
-            <url>https://maven.vaadin.com/vaadin-prereleases</url>
         </repository>
     </repositories>
 
@@ -65,22 +68,14 @@
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin</artifactId>
+            <artifactId>vaadin-core</artifactId>
             <version>${vaadin.version}</version>
         </dependency>
 
-        <!-- Added to provide logging output as Flow uses -->
-        <!-- the unbound SLF4J no-operation (NOP) logger implementation -->
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
-            <scope>provided</scope>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-charts-flow</artifactId>
+            <version>${vaadin.charts.version}</version>
         </dependency>
 
         <dependency>
@@ -115,6 +110,20 @@
             <artifactId>jersey-media-json-jackson</artifactId>
             <version>2.25.1</version>
         </dependency>
+
+        <!-- Added to provide logging output as Flow uses -->
+        <!-- the unbound SLF4J no-operation (NOP) logger implementation -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -138,7 +147,6 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>${jetty.version}</version>
             </plugin>
-
             <plugin>
                 <groupId>com.speedment.enterprise</groupId>
                 <artifactId>speedment-enterprise-maven-plugin</artifactId>
@@ -149,12 +157,6 @@
                         <component>com.speedment.enterprise.virtualcolumn.tool.VirtualColumnToolBundle</component>
                         <component>com.speedment.enterprise.datastore.tool.DataStoreToolBundle</component>
                     </components>
-                    <parameters>
-                        <parameter>
-                            <name>licenseKey</name>
-                            <value>${speedment.license.key}</value>
-                        </parameter>
-                    </parameters>
                 </configuration>
 
                 <executions>
@@ -212,7 +214,7 @@
                     <plugin>
                         <groupId>com.vaadin</groupId>
                         <artifactId>flow-maven-plugin</artifactId>
-                        <version>1.0.0.alpha21</version>
+                        <version>1.0.0.beta2</version>
                         <executions>
                             <execution>
                                 <goals>

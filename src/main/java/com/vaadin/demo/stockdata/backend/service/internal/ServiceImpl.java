@@ -24,7 +24,7 @@ import static com.helger.commons.CGlobal.SECONDS_PER_DAY;
 
 public class ServiceImpl implements Service {
 
-    private static final String LICENSE_KEY = "BRyNdOMyy+hEWkR4ZGF0YXN0b3JlLGRiMixtc3NxbCxvcmFjbGUsdmlydHVhbC1jb2x1bW5zOxMv77xkTtQYpSV5abH3oJm9YgnQ8/3gXHLCncZWuSUuQ496ni5BvSKEcGrVaTpbq1ukzr0BmTQJBaQIWYnFrM+CAdVgF8NZhFrojCZ9P1KEk6syaHpoU8Mg2iJjrDqfJmUP5KR6GxomESf02GLYVB1pF23knuzT5n0U/HVaGo1q";
+    private static final String LICENSE_KEY = "HhD32Q3KophEmEYFYXBpLW1hbmFnZXIsZGF0YXN0b3JlLGRiMixtc3NxbCxvcmFjbGUscmVhY3Rvcix2aXJ0dWFsLWNvbHVtbnM7PG7WjvzDDv08zjh1gSR7EzdSBlFloOYuvMGIz1/+gsGClX0w/u9o+5hl6I6lVgz20/HP8K81NGHUUiU+lW/Hf3wM4RJybQ6be9OjgKa86aDwjXGGi8k8J/CzAx/vk7YZMUSXp1pRTxrRoRT7FpkHg0sKH2qM2kTR6tyfph8mC5I=";
 
     private final Speedment sqlApp;
     private final Speedment acceleratedApp;
