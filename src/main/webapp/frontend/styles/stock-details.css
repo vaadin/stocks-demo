@@ -1,0 +1,8 @@
+.current-value {
+    font-size: 3em;
+}
+
+.company-info {
+    justify-self: flex-end;
+    text-align: right;
+}

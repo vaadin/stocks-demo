@@ -12,7 +12,6 @@ import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.data_point.DataPo
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.data_point.DataPointManager;
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.symbol.Symbol;
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.symbol.SymbolManager;
-import com.vaadin.demo.stockdata.backend.service.Portfolio;
 import com.vaadin.demo.stockdata.backend.service.Service;
 
 import java.math.BigDecimal;
@@ -78,11 +77,6 @@ public class ServiceImpl implements Service {
     }
 
     @Override
-    public Portfolio getPortfolio() {
-        return new PortfolioImpl(this, sqlApp);
-    }
-
-    @Override
     public Stream<DataPoint> getHistoryData(Symbol symbol, LocalDate startDate, LocalDate endDate) {
         long start = startDate.toEpochDay() * SECONDS_PER_DAY;
         long end = endDate.toEpochDay() * SECONDS_PER_DAY;
@@ -126,14 +120,14 @@ public class ServiceImpl implements Service {
                 .map(Optional::get)
                 .forEach(System.out::println);
 
-            Portfolio portfolio = service.getPortfolio();
-            BigDecimal preValue = portfolio.getCurrentValue();
-            final int amount = 10000;
-            portfolio.addInvestment(symbol, amount);
-            BigDecimal postValue = portfolio.getCurrentValue();
-            System.out.println("Adding " + amount + " of " + symbol.getName() + " increses value from " + preValue + " to " + postValue);
-            portfolio.addInvestment(symbol, -amount);
-            assert preValue.equals(portfolio.getCurrentValue());
+//            Portfolio portfolio = service.getPortfolio();
+//            BigDecimal preValue = portfolio.getCurrentValue();
+//            final int amount = 10000;
+//            portfolio.addInvestment(symbol, amount);
+//            BigDecimal postValue = portfolio.getCurrentValue();
+//            System.out.println("Adding " + amount + " of " + symbol.getName() + " increses value from " + preValue + " to " + postValue);
+//            portfolio.addInvestment(symbol, -amount);
+//            assert preValue.equals(portfolio.getCurrentValue());
         } else {
             System.out.println("No symbols in database");
         }

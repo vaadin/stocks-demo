@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Service for managing a user's portfolio and getting historical data.
+ * Service for  getting historical data.
  * This demo app has no concept of users, so the entire database is a
  * single user.
  */
@@ -28,10 +28,6 @@ public interface Service {
         return new ServiceImpl(hostIp, user, password);
     }
 
-    /**
-     * @return the demo user's portfolio
-     */
-    Portfolio getPortfolio();
 
     /**
      * Retrieve historical data points for a given symbol.
