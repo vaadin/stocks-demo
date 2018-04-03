@@ -11,12 +11,17 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
+import io.reactivex.disposables.Disposable;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparingDouble;
@@ -25,6 +30,7 @@ import static java.util.Comparator.comparingDouble;
 public class StockDetails extends VerticalLayout implements StockList.SymbolSelectedListener {
 
   private Service service = ServiceDirectory.getServiceInstance();
+  private Disposable subscription;
 
 
   StockDetails() {
@@ -50,6 +56,12 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
     } else {
       showNoSymbolSelected();
     }
+
+    addDetachListener(detach-> {
+      if (subscription != null) {
+        subscription.dispose();
+      }
+    });
   }
 
   private void addSymbolDetailsLayout(Symbol symbol) {
@@ -71,10 +83,11 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
   }
 
 
-  private List<DataSeriesItem> getSymbolData(Symbol symbol, LocalDate startDate, LocalDate endDate) {
+  // Fixme: should use DateTime for proper zooming
+  private List<DataSeriesItem> getSymbolData(Symbol symbol, LocalDateTime startDate, LocalDateTime endDate) {
     long start = System.currentTimeMillis();
     List<DataSeriesItem> items = service.getHistoryData(symbol, startDate, endDate)
-        .limit(100) // FIXME: service should provide data with a proper resolution. Now, were getting 13MB of data to send to the client
+        .limit(1000) // FIXME: service should provide data with a proper resolution. Now, were getting 13MB of data to send to the client
         .map(dataPoint -> {
           OhlcItem ohlcItem = new OhlcItem();
           ohlcItem.setOpen(dataPoint.getOpen() / 100.0);
@@ -89,6 +102,7 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
   }
 
   private void addDetailChart(Symbol symbol) {
+    if(subscription!=null) subscription.dispose();
 
     Chart chart = new Chart();
     chart.setTimeline(true);
@@ -114,7 +128,7 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
 
     DataSeries dataSeries = new DataSeries();
     dataSeries.setName("Value");
-    dataSeries.setData(getSymbolData(symbol, LocalDate.MIN, LocalDate.MAX));
+    dataSeries.setData(getSymbolData(symbol, LocalDateTime.MIN, LocalDateTime.MAX));
     configuration.setSeries(dataSeries);
 
 
@@ -133,28 +147,37 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
 
     chart.setWidth("100%");
 
-    // Listen to x-axis extremes event and update more fine grained data from service.
-    // FIXME: needs to be debounced
-    chart.addListener(XAxisExtremesEvent.class, event -> {
-      List<DataSeriesItem> zoomedData = getSymbolData(symbol,
-          Instant.ofEpochMilli(event.getMin().longValue()).atZone(ZoneId.systemDefault()).toLocalDate(),
-          Instant.ofEpochMilli(event.getMax().longValue()).atZone(ZoneId.systemDefault()).toLocalDate());
-      dataSeries.setData(zoomedData);
-      dataSeries.updateSeries();
+    // FIXME: Listen to x-axis extremes event and update more fine grained data from service.
+    Flowable<XAxisExtremesEvent> flow = Flowable.create(emitter ->
+        chart.addListener(XAxisExtremesEvent.class, emitter::onNext),
+        BackpressureStrategy.LATEST);
 
-      Pair<Number, Number> newMinMax = findMinMax(dataSeries);
-      configuration.fireAxesRescaled(yAxis, newMinMax.getLeft(), newMinMax.getRight(), true, true);
-    });
+    subscription = flow.debounce(500, TimeUnit.MILLISECONDS)
+        .subscribe(event -> {
+          List<DataSeriesItem> zoomedData = getSymbolData(symbol,
+              timestampToLocalDateTime(event.getMin()),
+              timestampToLocalDateTime(event.getMax()));
+          dataSeries.setData(zoomedData);
+          dataSeries.updateSeries();
+
+          Pair<Number, Number> newMinMax = findMinMax(dataSeries);
+          configuration.fireAxesRescaled(yAxis, newMinMax.getLeft(), newMinMax.getRight(), true, true);
+        });
+
 
     add(chart);
     expand(chart);
   }
 
-  private Pair<Number, Number> findMinMax(DataSeries dataSeries) {
-    Number min = dataSeries.getData().stream().map(DataSeriesItem::getY).min(comparingDouble(Number::intValue)).get();
-    Number max = dataSeries.getData().stream().map(DataSeriesItem::getY).max(comparingDouble(Number::intValue)).get();
-    return Pair.of(Math.max(0, min.intValue() - 15), Math.min(100, max.intValue() + 15));
+  private LocalDateTime timestampToLocalDateTime(Double jsTimestamp) {
+    return Instant.ofEpochMilli(jsTimestamp.longValue()).atZone(ZoneId.systemDefault()).toLocalDateTime();
   }
 
+  private Pair<Number, Number> findMinMax(DataSeries dataSeries) {
+    List<DataSeriesItem> data = dataSeries.getData();
+    Number min = data.stream().map(DataSeriesItem::getY).min(comparingDouble(Number::intValue)).orElse(0.0);
+    Number max = data.stream().map(DataSeriesItem::getY).max(comparingDouble(Number::intValue)).orElse(0.0);
+    return Pair.of(Math.max(0, min.intValue() - 15), Math.min(100, max.intValue() + 15));
+  }
 
 }

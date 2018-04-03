@@ -15,11 +15,10 @@ import com.vaadin.flow.theme.lumo.Lumo;
 @HtmlImport("frontend://src/sparkline-chart.html")
 @BodySize(height = "100vh", width = "100vw")
 @Viewport("width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes")
-public class MainView extends HorizontalLayout implements PageConfigurator {
+public class MainView extends HorizontalLayout {
 
   public MainView() {
     setSizeFull();
-    setPadding(true);
     setSpacing(true);
 
     StockList stockList = new StockList();
@@ -29,9 +28,4 @@ public class MainView extends HorizontalLayout implements PageConfigurator {
     add(stockList, stockDetails);
   }
 
-  @Override
-  public void configurePage(InitialPageSettings settings) {
-    // Use dark theme variant. https://github.com/vaadin/flow/issues/3675
-    settings.getUi().getElement().setAttribute("theme", "dark");
-  }
 }

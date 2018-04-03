@@ -16,6 +16,9 @@ import com.vaadin.demo.stockdata.backend.service.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -77,9 +80,9 @@ public class ServiceImpl implements Service {
     }
 
     @Override
-    public Stream<DataPoint> getHistoryData(Symbol symbol, LocalDate startDate, LocalDate endDate) {
-        long start = startDate.toEpochDay() * SECONDS_PER_DAY;
-        long end = endDate.toEpochDay() * SECONDS_PER_DAY;
+    public Stream<DataPoint> getHistoryData(Symbol symbol, LocalDateTime startTime, LocalDateTime endTime) {
+        long start = startTime.toEpochSecond(ZoneOffset.UTC);
+        long end = endTime.toEpochSecond(ZoneOffset.UTC);
         return dataPoints.stream()
             .filter(DataPoint.SYMBOL_ID.equal(symbol.getId()))
             .filter(DataPoint.TIME_STAMP.between(start, end, Inclusion.START_INCLUSIVE_END_INCLUSIVE))
@@ -109,7 +112,7 @@ public class ServiceImpl implements Service {
         if (symbolOptional.isPresent()) {
             Symbol symbol = symbolOptional.get();
             System.out.println("10 oldest data for " + symbol.getName());
-            service.getHistoryData(symbolOptional.get(), LocalDate.MIN, LocalDate.MAX)
+            service.getHistoryData(symbolOptional.get(), LocalDateTime.MIN, LocalDateTime.MAX)
                 .limit(10)
                 .forEachOrdered(System.out::println);
 

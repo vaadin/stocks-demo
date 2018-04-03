@@ -5,6 +5,7 @@ import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.symbol.Symbol;
 import com.vaadin.demo.stockdata.backend.service.internal.ServiceImpl;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -33,11 +34,11 @@ public interface Service {
      * Retrieve historical data points for a given symbol.
      *
      * @param symbol Symbol we want history data for.
-     * @param startDate Start date (inclusive)
-     * @param endDate End date (inclusive)
+     * @param startTime Start time (inclusive)
+     * @param endTime End time (inclusive)
      * @return The stream of all data points of the given symbol and time interval
      */
-    Stream<DataPoint> getHistoryData(Symbol symbol, LocalDate startDate, LocalDate endDate);
+    Stream<DataPoint> getHistoryData(Symbol symbol, LocalDateTime startTime, LocalDateTime endTime);
 
     /**
      * @param symbol the symbol for which to get data

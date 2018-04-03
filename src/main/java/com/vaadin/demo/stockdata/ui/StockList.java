@@ -2,6 +2,7 @@ package com.vaadin.demo.stockdata.ui;
 
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.symbol.Symbol;
 import com.vaadin.demo.stockdata.backend.service.Service;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcons;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -11,12 +12,14 @@ import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@StyleSheet("frontend://styles/stock-list.css")
 public class StockList extends VerticalLayout {
   public interface SymbolSelectedListener {
     void symbolSelected(Symbol symbol);
@@ -31,6 +34,7 @@ public class StockList extends VerticalLayout {
 
   StockList() {
     setHeight("100%");
+    getThemeList().add("dark");
     addSearchField();
     addGrid();
     setupGridDataProvider();
@@ -40,10 +44,9 @@ public class StockList extends VerticalLayout {
 
   private void addSearchField() {
     searchField = new TextField();
+    searchField.addClassName("search-field");
     searchField.setPrefixComponent(VaadinIcons.SEARCH.create());
     searchField.setPlaceholder("Search by stock");
-    searchField.setWidth("100%");
-    searchField.getStyle().set("margin", "10px 15px 5px 15px");
     searchField.setValueChangeMode(ValueChangeMode.EAGER);
 
     add(searchField);
@@ -99,7 +102,7 @@ public class StockList extends VerticalLayout {
     stockItem.setSymbol(symbol);
 
     // FIXME: get today's symbols
-    List<Double> history = service.getHistoryData(symbol, LocalDate.MIN, LocalDate.MAX)
+    List<Double> history = service.getHistoryData(symbol, LocalDateTime.MIN, LocalDateTime.MAX)
         .limit(10)
         .map(p -> p.getClose() / 100.0)
         .collect(Collectors.toList());
