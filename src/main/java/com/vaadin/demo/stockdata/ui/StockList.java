@@ -12,6 +12,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -98,9 +99,11 @@ public class StockList extends VerticalLayout {
     stockItem.setSymbol(symbol);
 
     // FIXME: get today's symbols
-    stockItem.setHistory(service.getHistoryData(symbol, LocalDate.now(), LocalDate.MAX)
+    List<Double> history = service.getHistoryData(symbol, LocalDate.MIN, LocalDate.MAX)
         .limit(10)
-        .map(p -> p.getClose() / 100.0).collect(Collectors.toList()));
+        .map(p -> p.getClose() / 100.0)
+        .collect(Collectors.toList());
+    stockItem.setHistory(history);
 
     service.getMostRecentDataPoint(symbol).ifPresent(data -> stockItem.setCurrentValue(MoneyFormatter.format(data.getClose())));
 
