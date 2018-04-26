@@ -60,9 +60,6 @@ public class DatabaseCreator implements AutoCloseable {
     }
 
     private void clearAndPopulate() throws IOException {
-        final TransactionComponent transactionComponent = app.getOrThrow(TransactionComponent.class);
-        final TransactionHandler txHandler = transactionComponent.createTransactionHandler();
-
         DataPointManager dataPoints = app.getOrThrow(DataPointManager.class);
         final AtomicLong realDataCount = new AtomicLong();
         final AtomicLong doneSymbols = new AtomicLong();
@@ -72,7 +69,7 @@ public class DatabaseCreator implements AutoCloseable {
         final SymbolManager symbols = app.getOrThrow(SymbolManager.class);
 
         System.out.println("Creating symbols...");
-        final CachingPersister<Symbol> symbolPersister = new CachingPersister<>(txHandler, symbols, $ -> {});
+        final CachingPersister<Symbol> symbolPersister = new CachingPersister<>(app, symbols, $ -> {});
         getNadaqSymbols().forEach(symbolPersister);
         symbolPersister.flush();
 
@@ -93,7 +90,7 @@ public class DatabaseCreator implements AutoCloseable {
                         symbolCount);
             }
         };
-        final CachingPersister<DataPoint> persister = new CachingPersister<>(txHandler, dataPoints, progressConsumer);
+        final CachingPersister<DataPoint> persister = new CachingPersister<>(app, dataPoints, progressConsumer);
         final AlphaVantageClient stockClient = new AlphaVantageClient();
 
         int startStep = 60000;

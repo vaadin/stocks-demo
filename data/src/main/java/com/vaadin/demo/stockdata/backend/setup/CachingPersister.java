@@ -1,5 +1,7 @@
 package com.vaadin.demo.stockdata.backend.setup;
 
+import com.speedment.runtime.core.Speedment;
+import com.speedment.runtime.core.component.transaction.TransactionComponent;
 import com.speedment.runtime.core.component.transaction.TransactionHandler;
 import com.speedment.runtime.core.manager.Manager;
 import com.speedment.runtime.core.manager.Persister;
@@ -19,8 +21,8 @@ class CachingPersister<T> implements Consumer<T> {
     private volatile ArrayBlockingQueue<T> cache;
     private final AtomicLong persistCount;
 
-    public CachingPersister(TransactionHandler txHandler, Manager<T> manager, Consumer<Long> progress) {
-        this.txHandler = txHandler;
+    public CachingPersister(Speedment app, Manager<T> manager, Consumer<Long> progress) {
+        txHandler = app.getOrThrow(TransactionComponent.class).createTransactionHandler();
         persister = manager.persister();
         persistCount = new AtomicLong();
         progressConsumer = progress;
