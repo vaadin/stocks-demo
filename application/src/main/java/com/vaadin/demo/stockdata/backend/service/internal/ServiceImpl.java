@@ -27,11 +27,6 @@ public class ServiceImpl implements Service {
     private static final String LICENSE_KEY = "HhD32Q3KophEmEYFYXBpLW1hbmFnZXIsZGF0YXN0b3JlLGRiMixtc3NxbCxvcmFjbGUscmVhY3Rvcix2aXJ0dWFsLWNvbHVtbnM7PG7WjvzDDv08zjh1gSR7EzdSBlFloOYuvMGIz1/+gsGClX0w/u9o+5hl6I6lVgz20/HP8K81NGHUUiU+lW/Hf3wM4RJybQ6be9OjgKa86aDwjXGGi8k8J/CzAx/vk7YZMUSXp1pRTxrRoRT7FpkHg0sKH2qM2kTR6tyfph8mC5I=";
 
     /**
-     * Approximate number of data points returned in each batch
-     */
-    private static final int POINTS_PER_BATCH = 300;
-
-    /**
      * The minimum granularity of the batch. If the user requests a large range and actual data is confined in a very small
      * sub sequence of the requested range, the granularity given by the large range will sieve out too much data yielding
      * a very small batch. Setting this value to at least one data point per day avoids this problem.
@@ -95,11 +90,14 @@ public class ServiceImpl implements Service {
     }
 
     @Override
-    public Stream<DataPoint> getHistoryData(Symbol symbol, LocalDateTime startTime, LocalDateTime endTime) {
+    public Stream<DataPoint> getHistoryData(Symbol symbol, LocalDateTime startTime, LocalDateTime endTime, int numberOfPoints) {
+        if (numberOfPoints < 2) {
+            throw new IllegalArgumentException("The number of points returned shall always be more than 2");
+        }
         long start = startTime.toEpochSecond(ZoneOffset.UTC);
         long end = endTime.toEpochSecond(ZoneOffset.UTC);
         long range = end - start;
-        double step = range / (POINTS_PER_BATCH - 1);  // The number of steps if dividing evenly over given range
+        double step = range / (numberOfPoints - 1);  // The number of steps if dividing evenly over given range
         long granularity = Math.min(
                 MAXIMUM_GRANULARITY,
                 Math.max(1, (long)step)
@@ -110,7 +108,7 @@ public class ServiceImpl implements Service {
                 .sorted(DataPoint.TIME_STAMP.comparator())
                 .collect(SieveListCollector.of(
                         DataPoint::getTimeStamp,
-                        POINTS_PER_BATCH,
+                        numberOfPoints,
                         granularity
                 )).get();
     }
@@ -137,7 +135,7 @@ public class ServiceImpl implements Service {
         if (symbolOptional.isPresent()) {
             Symbol symbol = symbolOptional.get();
             System.out.println("10 oldest data for " + symbol.getName());
-            service.getHistoryData(symbolOptional.get(), LocalDateTime.MIN, LocalDateTime.MAX)
+            service.getHistoryData(symbolOptional.get(), LocalDateTime.MIN, LocalDateTime.MAX, 1)
                     .limit(10)
                     .forEachOrdered(System.out::println);
 

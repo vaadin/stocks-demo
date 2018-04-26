@@ -27,6 +27,11 @@ import static java.util.Comparator.comparingDouble;
 @StyleSheet("frontend://styles/stock-details.css")
 public class StockDetails extends VerticalLayout implements StockList.SymbolSelectedListener {
 
+  /**
+   * Approximate number of data points returned in each batch
+   */
+  private static final int DATA_POINT_BATCH_SIZE = 300;
+
   private Service service = ServiceDirectory.getServiceInstance();
   private Disposable subscription;
 
@@ -83,7 +88,7 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
 
   private List<DataSeriesItem> getSymbolData(Symbol symbol, LocalDateTime startDate, LocalDateTime endDate) {
     long start = System.currentTimeMillis();
-    List<DataSeriesItem> items = service.getHistoryData(symbol, startDate, endDate)
+    List<DataSeriesItem> items = service.getHistoryData(symbol, startDate, endDate, DATA_POINT_BATCH_SIZE)
         .map(dataPoint -> {
           OhlcItem ohlcItem = new OhlcItem();
           ohlcItem.setOpen(dataPoint.getOpen() / 100.0);

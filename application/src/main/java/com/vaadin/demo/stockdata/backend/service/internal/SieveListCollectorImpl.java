@@ -9,13 +9,21 @@ import java.util.function.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static java.util.Objects.requireNonNull;
+
 public class SieveListCollectorImpl<T> implements SieveListCollector<T> {
     private final ToLongFunction<T> distanceMeasure;
     private final int size;
     private final long granularity;
 
     public SieveListCollectorImpl(ToLongFunction<T> distanceMeasure, int size, long granularity) {
-        this.distanceMeasure = distanceMeasure;
+        this.distanceMeasure = requireNonNull(distanceMeasure);
+        if (size < 2) {
+            throw new IllegalArgumentException(getClass().getSimpleName() + " needs size of at least 2 items");
+        }
+        if (granularity < 1) {
+            throw new IllegalArgumentException(getClass().getSimpleName() + " needs minimum granularity of at least 1");
+        }
         this.size = size;
         this.granularity = granularity;
     }

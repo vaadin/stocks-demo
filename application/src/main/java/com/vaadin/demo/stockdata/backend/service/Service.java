@@ -34,9 +34,10 @@ public interface Service {
      * @param symbol Symbol we want history data for.
      * @param startTime Start time (inclusive)
      * @param endTime End time (inclusive)
+     * @param numberOfPoints Approximate number of points to be returned
      * @return The stream of all data points of the given symbol and time interval
      */
-    Stream<DataPoint> getHistoryData(Symbol symbol, LocalDateTime startTime, LocalDateTime endTime);
+    Stream<DataPoint> getHistoryData(Symbol symbol, LocalDateTime startTime, LocalDateTime endTime, int numberOfPoints);
 
     /**
      * @param symbol the symbol for which to get data

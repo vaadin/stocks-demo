@@ -101,8 +101,7 @@ public class StockList extends VerticalLayout {
     stockItem.setSymbol(symbol);
 
     // FIXME: get today's symbols
-    List<Double> history = service.getHistoryData(symbol, LocalDateTime.MIN, LocalDateTime.MAX)
-        .limit(10)
+    List<Double> history = service.getHistoryData(symbol, LocalDateTime.MIN, LocalDateTime.MAX, 10)
         .map(p -> p.getClose() / 100.0)
         .collect(Collectors.toList());
     stockItem.setHistory(history);
