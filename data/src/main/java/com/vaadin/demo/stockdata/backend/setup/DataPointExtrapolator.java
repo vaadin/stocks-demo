@@ -3,7 +3,10 @@ package com.vaadin.demo.stockdata.backend.setup;
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.data_point.DataPoint;
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.data_point.DataPointImpl;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Random;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 

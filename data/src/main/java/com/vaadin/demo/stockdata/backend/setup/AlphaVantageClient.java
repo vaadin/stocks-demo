@@ -5,11 +5,8 @@ import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.data_point.DataPo
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.symbol.Symbol;
 import com.vaadin.demo.stockdata.util.TimeUtil;
 
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.ServiceUnavailableException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.ResponseProcessingException;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import java.text.ParseException;

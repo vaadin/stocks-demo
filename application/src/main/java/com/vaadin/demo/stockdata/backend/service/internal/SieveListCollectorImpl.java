@@ -3,7 +3,8 @@ package com.vaadin.demo.stockdata.backend.service.internal;
 import com.vaadin.demo.stockdata.backend.service.MonotonicList;
 import com.vaadin.demo.stockdata.backend.service.SieveListCollector;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Set;
 import java.util.function.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;

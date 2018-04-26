@@ -3,8 +3,6 @@ package com.vaadin.demo.stockdata.backend.setup;
 import com.speedment.common.benchmark.Stopwatch;
 import com.speedment.common.benchmark.internal.StopwatchImpl;
 import com.speedment.runtime.core.Speedment;
-import com.speedment.runtime.core.component.transaction.TransactionComponent;
-import com.speedment.runtime.core.component.transaction.TransactionHandler;
 import com.speedment.runtime.core.stream.parallel.ParallelStrategy;
 import com.vaadin.demo.stockdata.backend.db.StockdataApplicationBuilder;
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.data_point.DataPoint;

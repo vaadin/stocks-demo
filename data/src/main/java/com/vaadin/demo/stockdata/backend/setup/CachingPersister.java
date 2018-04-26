@@ -5,8 +5,6 @@ import com.speedment.runtime.core.component.transaction.TransactionComponent;
 import com.speedment.runtime.core.component.transaction.TransactionHandler;
 import com.speedment.runtime.core.manager.Manager;
 import com.speedment.runtime.core.manager.Persister;
-import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.data_point.DataPoint;
-import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.data_point.DataPointManager;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
