@@ -20,7 +20,7 @@
     <dependencies>
         <dependency>
             <groupId>com.vaadin.demo.stocks-demo</groupId>
-            <artifactId>db</artifactId>
+            <artifactId>data</artifactId>
             <version>${parent.version}</version>
         </dependency>
 
