@@ -41,7 +41,9 @@ public class SieveList<T> implements MonotonicList<T> {
             if (itemPosition >= nextPosition) {
                 items.add(item);
                 nextPosition = (double) itemPosition + step;
-                step = (nextPosition - startPosition) / (size - 1);
+                if (items.size() % size == 0) {
+                    step = (nextPosition - startPosition) / (size - 1);
+                }
             }
         }
         last = item;
