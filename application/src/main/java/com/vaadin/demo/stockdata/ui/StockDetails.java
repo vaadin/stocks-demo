@@ -69,14 +69,17 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
 
   private void addSymbolDetailsLayout(Symbol symbol) {
     service.getMostRecentDataPoint(symbol).ifPresent(dataPoint -> {
+
       Span currentValue = new Span(MoneyFormatter.format(dataPoint.getClose()));
-      currentValue.addClassName("current-value");
       Div ticker = new Div(new Text(symbol.getTicker()));
-      ticker.addClassName("ticker");
       Div name = new Div(new Text(symbol.getName()));
-      name.addClassName("name");
       Div companyInfo = new Div(ticker, name);
+
+      currentValue.addClassName("current-value");
+      ticker.addClassName("ticker");
+      name.addClassName("name");
       companyInfo.addClassName("company-info");
+
       FlexLayout flexLayout = new FlexLayout(currentValue, companyInfo);
       flexLayout.setWidth("100%");
       flexLayout.setJustifyContentMode(JustifyContentMode.BETWEEN);
@@ -99,7 +102,6 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
           return ohlcItem;
         }).collect(Collectors.toList());
 
-    System.out.println("Getting series data took " + (System.currentTimeMillis() - start));
     return items;
   }
 
@@ -149,7 +151,7 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
 
     chart.setWidth("100%");
 
-    // FIXME: Listen to x-axis extremes event and update more fine grained data from service.
+
     Flowable<XAxisExtremesEvent> flow = Flowable.create(emitter ->
         chart.addListener(XAxisExtremesEvent.class, emitter::onNext),
         BackpressureStrategy.LATEST);
