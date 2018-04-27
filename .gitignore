@@ -6,3 +6,4 @@ target
 .idea
 .settings
 rebel.xml
+**/dependency-reduced-pom.xml

@@ -12,9 +12,7 @@ HOST="localhost"
 USER="root"
 PASSWORD="root"
 
-# This number controls the size of the final database
-EXTRAPOLATE_INTERVAL=60
+echo "Connecting to MySQL server at ${HOST} with user ${USER} to create stocks database"
 
-echo "Connecting to ${HOST} with user ${USER}, will extrapolate data to get points every ${EXTRAPOLATE_INTERVAL} seconds."
-
-mvn -q package exec:java -Dexec.mainClass=com.vaadin.demo.stockdata.backend.setup.DatabaseCreator -Dexec.args="${HOST} ${USER} ${PASSWORD} ${EXTRAPOLATE_INTERVAL} ${API_KEY}"
+mvn -q clean package
+java -jar data/target/data-1.0-SNAPSHOT.jar ${HOST} ${USER} ${PASSWORD} ${API_KEY}

@@ -1,0 +1,32 @@
+version: '2.1'
+services:
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306/tcp"
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-proot", "-h", "localhost"]
+      interval: 3s
+      timeout: 10s
+      retries: 50
+
+  app:
+    build:
+      context: application
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+     - "8080:8080/tcp"
+
+  data:
+    build:
+      context: data
+    working_dir: /usr/src/stocks
+    command: db root root ${STOCKS_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
