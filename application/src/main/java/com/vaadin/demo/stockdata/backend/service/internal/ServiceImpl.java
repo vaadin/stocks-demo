@@ -117,7 +117,8 @@ public class ServiceImpl implements Service {
     public Optional<DataPoint> getMostRecentDataPoint(Symbol symbol) {
         return dataPoints.stream()
                 .filter(DataPoint.SYMBOL_ID.equal(symbol.getId()))
-                .max(DataPoint.TIME_STAMP.comparator());
+                .sorted(DataPoint.TIME_STAMP.comparator().reversed())
+                .findFirst();
     }
 
     @Override
