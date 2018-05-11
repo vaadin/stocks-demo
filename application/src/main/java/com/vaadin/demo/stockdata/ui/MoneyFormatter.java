@@ -6,8 +6,10 @@ import java.util.Locale;
 
 public class MoneyFormatter {
 
+    private static final BigDecimal CENTS_ON_A_DOLLAR = BigDecimal.valueOf(100);
+
     public static String format(long cents) {
-        return format(new BigDecimal(cents).divide(BigDecimal.TEN, BigDecimal.ROUND_HALF_UP));
+        return format(new BigDecimal(cents).divide(CENTS_ON_A_DOLLAR, BigDecimal.ROUND_HALF_UP));
     }
 
     public static String format(BigDecimal number) {
