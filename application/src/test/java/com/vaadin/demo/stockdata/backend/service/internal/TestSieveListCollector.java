@@ -10,6 +10,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestSieveListCollector {
@@ -78,5 +79,14 @@ public class TestSieveListCollector {
             }
             last = i;
         }
+    }
+
+    @Test
+    public void testUnsortedInupt() {
+        assertThrows(IllegalArgumentException.class, () -> IntStream.range(0, 10)
+                .map( i -> 10 - i)
+                .boxed()
+                .collect(SieveListCollector.of(i -> i, 10, 1))
+        );
     }
 }

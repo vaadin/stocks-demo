@@ -98,9 +98,9 @@ public class ServiceImpl implements Service {
         long end = endTime.toEpochSecond(ZoneOffset.UTC);
         long range = end - start;
         double step = range / (numberOfPoints - 1);  // The number of steps if dividing evenly over given range
-        long granularity = Math.min(
+        int granularity = Math.min(
                 MAXIMUM_GRANULARITY,
-                Math.max(1, (long)step)
+                Math.max(1, (int)step)
         );
         return dataPoints.stream()
                 .filter(DataPoint.SYMBOL_ID.equal(symbol.getId()))
