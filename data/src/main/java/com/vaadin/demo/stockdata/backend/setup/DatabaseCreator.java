@@ -54,7 +54,7 @@ public class DatabaseCreator implements AutoCloseable {
 
     @Override
     public void close() {
-        app.stop();
+        app.close();
     }
 
     private void clearAndPopulate() throws IOException {

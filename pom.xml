@@ -22,7 +22,7 @@
 
         <!-- Dependencies -->
         <vaadin.version>10.0.0.beta4</vaadin.version>
-        <speedment.enterprise.version>1.1.13</speedment.enterprise.version>
+        <speedment.enterprise.version>3.1.2</speedment.enterprise.version>
         <vaadin.charts.version>6.0.0.beta2</vaadin.charts.version>
         <mysql-version>5.1.42</mysql-version>
         <junit.jupiter.version>5.0.2</junit.jupiter.version>
