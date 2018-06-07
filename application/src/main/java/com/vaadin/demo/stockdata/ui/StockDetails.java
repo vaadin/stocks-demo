@@ -62,7 +62,7 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
       showNoSymbolSelected();
     }
 
-    addDetachListener(detach-> {
+    addDetachListener(detach -> {
       if (subscription != null) {
         subscription.dispose();
       }
@@ -92,7 +92,7 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
 
 
   private List<DataSeriesItem> getSymbolData(Symbol symbol, LocalDateTime startDate, LocalDateTime endDate) {
-    return service.getHistoryData(symbol, startDate, endDate, DATA_POINT_BATCH_SIZE)
+    List<DataSeriesItem> items = service.getHistoryData(symbol, startDate, endDate, DATA_POINT_BATCH_SIZE)
         .map(dataPoint -> {
           OhlcItem ohlcItem = new OhlcItem();
           ohlcItem.setOpen(dataPoint.getOpen() / 100.0);
@@ -102,10 +102,11 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
           ohlcItem.setX(Instant.ofEpochSecond(dataPoint.getTimeStamp()));
           return ohlcItem;
         }).collect(Collectors.toList());
+    return items;
   }
 
   private void addDetailChart(Symbol symbol) {
-    if(subscription!=null) subscription.dispose();
+    if (subscription != null) subscription.dispose();
 
     Chart chart = new Chart();
     chart.setTimeline(true);
@@ -151,21 +152,25 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
     chart.setWidth("100%");
 
 
-
     Flowable<XAxesExtremesSetEvent> flow = Flowable.create(emitter ->
-        chart.addListener(XAxesExtremesSetEvent.class, emitter::onNext),
+            chart.addXAxesExtremesSetListener(emitter::onNext),
         BackpressureStrategy.LATEST);
 
     subscription = flow.debounce(500, TimeUnit.MILLISECONDS)
         .subscribe(event -> {
+
           List<DataSeriesItem> zoomedData = getSymbolData(symbol,
               timestampToLocalDateTime(event.getMinimum()),
               timestampToLocalDateTime(event.getMaximum()));
           dataSeries.setData(zoomedData);
-          dataSeries.updateSeries();
-
           Pair<Number, Number> newMinMax = findMinMax(dataSeries);
-          configuration.fireAxesRescaled(yAxis, newMinMax.getLeft(), newMinMax.getRight(), true, true);
+
+          getUI().ifPresent(ui -> ui.access(() -> {
+            dataSeries.updateSeries();
+            configuration.fireAxesRescaled(yAxis, newMinMax.getLeft(), newMinMax.getRight(), true, true);
+          }));
+
+
         });
 
 
