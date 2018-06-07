@@ -137,7 +137,7 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
 
 
     PlotOptionsOhlc plotOptions = new PlotOptionsOhlc();
-    Marker marker = new Marker();
+    plotOptions.setAnimation(false);
     configuration.setPlotOptions(plotOptions);
 
     RangeSelector rangeSelector = new RangeSelector();
@@ -167,7 +167,7 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
 
           getUI().ifPresent(ui -> ui.access(() -> {
             dataSeries.updateSeries();
-            configuration.fireAxesRescaled(yAxis, newMinMax.getLeft(), newMinMax.getRight(), true, true);
+            configuration.fireAxesRescaled(yAxis, newMinMax.getLeft(), newMinMax.getRight(), true, false);
           }));
 
 
