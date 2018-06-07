@@ -60,7 +60,7 @@ class AlphaVantageClient {
                 lastException = e;
             }
             try {
-                System.out.println("Backing off due to failure: " + lastException.getMessage());
+                System.out.println("Failed to fetch data for " + symbol.getName() + ", will retry after backing off");
                 Thread.sleep(5000);  // Back off, the API does not like to be spammed
             } catch (InterruptedException e) {
                 //  Just continue then
