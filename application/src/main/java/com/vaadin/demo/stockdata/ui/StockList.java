@@ -4,7 +4,7 @@ import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.symbol.Symbol;
 import com.vaadin.demo.stockdata.backend.service.Service;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.icon.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -44,8 +44,8 @@ public class StockList extends VerticalLayout {
   private void addSearchField() {
     searchField = new TextField();
     searchField.addClassName("search-field");
-    searchField.setPrefixComponent(VaadinIcons.SEARCH.create());
-    searchField.setPlaceholder("Search by stock");
+    searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
+    searchField.setPlaceholder("Search by stocks");
     searchField.setValueChangeMode(ValueChangeMode.EAGER);
 
     add(searchField);
@@ -84,17 +84,21 @@ public class StockList extends VerticalLayout {
     grid.setPageSize(20);
     grid.setDataProvider(DataProvider.fromCallbacks(
         dataQuery -> {
-          long start = System.currentTimeMillis();
-          Stream<StockItem> items = service.getSymbols()
-              .filter(sym -> filter.isEmpty() || sym.getName().toLowerCase().contains(filter))
-              .skip(dataQuery.getOffset())
+          Stream<Symbol> symbolStream = getSymbolStream();
+          return symbolStream.skip(dataQuery.getOffset())
               .limit(dataQuery.getLimit())
               .map(this::toStockItem);
-          System.out.println("Data provider call took " + (System.currentTimeMillis() - start));
-          return items;
         },
-        countQuery -> (int) service.getSymbols().count()));
+        countQuery ->
+            (int) getSymbolStream().count()
+    ));
   }
+
+  private Stream<Symbol> getSymbolStream() {
+    return service.getSymbols()
+                .filter(sym -> filter.isEmpty() || sym.getTicker().toLowerCase().contains(filter));
+  }
+
 
   private StockItem toStockItem(Symbol symbol) {
     StockItem stockItem = new StockItem();
