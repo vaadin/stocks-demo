@@ -3,7 +3,9 @@ package com.vaadin.demo.stockdata.ui;
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.symbol.Symbol;
 import com.vaadin.demo.stockdata.backend.service.Service;
 import com.vaadin.flow.component.Text;
+
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.events.XAxesExtremesSetEvent;
 import com.vaadin.flow.component.charts.model.*;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
@@ -90,8 +92,7 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
 
 
   private List<DataSeriesItem> getSymbolData(Symbol symbol, LocalDateTime startDate, LocalDateTime endDate) {
-    long start = System.currentTimeMillis();
-    List<DataSeriesItem> items = service.getHistoryData(symbol, startDate, endDate, DATA_POINT_BATCH_SIZE)
+    return service.getHistoryData(symbol, startDate, endDate, DATA_POINT_BATCH_SIZE)
         .map(dataPoint -> {
           OhlcItem ohlcItem = new OhlcItem();
           ohlcItem.setOpen(dataPoint.getOpen() / 100.0);
@@ -101,8 +102,6 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
           ohlcItem.setX(Instant.ofEpochSecond(dataPoint.getTimeStamp()));
           return ohlcItem;
         }).collect(Collectors.toList());
-
-    return items;
   }
 
   private void addDetailChart(Symbol symbol) {
@@ -152,15 +151,16 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
     chart.setWidth("100%");
 
 
-    Flowable<XAxisExtremesEvent> flow = Flowable.create(emitter ->
-        chart.addListener(XAxisExtremesEvent.class, emitter::onNext),
+
+    Flowable<XAxesExtremesSetEvent> flow = Flowable.create(emitter ->
+        chart.addListener(XAxesExtremesSetEvent.class, emitter::onNext),
         BackpressureStrategy.LATEST);
 
     subscription = flow.debounce(500, TimeUnit.MILLISECONDS)
         .subscribe(event -> {
           List<DataSeriesItem> zoomedData = getSymbolData(symbol,
-              timestampToLocalDateTime(event.getMin()),
-              timestampToLocalDateTime(event.getMax()));
+              timestampToLocalDateTime(event.getMinimum()),
+              timestampToLocalDateTime(event.getMaximum()));
           dataSeries.setData(zoomedData);
           dataSeries.updateSeries();
 
