@@ -3,7 +3,9 @@ package com.vaadin.demo.stockdata.ui;
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.symbol.Symbol;
 import com.vaadin.demo.stockdata.backend.service.Service;
 import com.vaadin.flow.component.Text;
+
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.events.XAxesExtremesSetEvent;
 import com.vaadin.flow.component.charts.model.*;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
@@ -60,7 +62,7 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
       showNoSymbolSelected();
     }
 
-    addDetachListener(detach-> {
+    addDetachListener(detach -> {
       if (subscription != null) {
         subscription.dispose();
       }
@@ -90,7 +92,6 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
 
 
   private List<DataSeriesItem> getSymbolData(Symbol symbol, LocalDateTime startDate, LocalDateTime endDate) {
-    long start = System.currentTimeMillis();
     List<DataSeriesItem> items = service.getHistoryData(symbol, startDate, endDate, DATA_POINT_BATCH_SIZE)
         .map(dataPoint -> {
           OhlcItem ohlcItem = new OhlcItem();
@@ -101,12 +102,11 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
           ohlcItem.setX(Instant.ofEpochSecond(dataPoint.getTimeStamp()));
           return ohlcItem;
         }).collect(Collectors.toList());
-
     return items;
   }
 
   private void addDetailChart(Symbol symbol) {
-    if(subscription!=null) subscription.dispose();
+    if (subscription != null) subscription.dispose();
 
     Chart chart = new Chart();
     chart.setTimeline(true);
@@ -137,7 +137,7 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
 
 
     PlotOptionsOhlc plotOptions = new PlotOptionsOhlc();
-    Marker marker = new Marker();
+    plotOptions.setAnimation(false);
     configuration.setPlotOptions(plotOptions);
 
     RangeSelector rangeSelector = new RangeSelector();
@@ -152,20 +152,25 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
     chart.setWidth("100%");
 
 
-    Flowable<XAxisExtremesEvent> flow = Flowable.create(emitter ->
-        chart.addListener(XAxisExtremesEvent.class, emitter::onNext),
+    Flowable<XAxesExtremesSetEvent> flow = Flowable.create(emitter ->
+            chart.addXAxesExtremesSetListener(emitter::onNext),
         BackpressureStrategy.LATEST);
 
     subscription = flow.debounce(500, TimeUnit.MILLISECONDS)
         .subscribe(event -> {
-          List<DataSeriesItem> zoomedData = getSymbolData(symbol,
-              timestampToLocalDateTime(event.getMin()),
-              timestampToLocalDateTime(event.getMax()));
-          dataSeries.setData(zoomedData);
-          dataSeries.updateSeries();
 
+          List<DataSeriesItem> zoomedData = getSymbolData(symbol,
+              timestampToLocalDateTime(event.getMinimum()),
+              timestampToLocalDateTime(event.getMaximum()));
+          dataSeries.setData(zoomedData);
           Pair<Number, Number> newMinMax = findMinMax(dataSeries);
-          configuration.fireAxesRescaled(yAxis, newMinMax.getLeft(), newMinMax.getRight(), true, true);
+
+          getUI().ifPresent(ui -> ui.access(() -> {
+            dataSeries.updateSeries();
+            configuration.fireAxesRescaled(yAxis, newMinMax.getLeft(), newMinMax.getRight(), true, false);
+          }));
+
+
         });
 
 
