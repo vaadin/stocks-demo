@@ -1,4 +1,4 @@
-package com.vaadin.demo.stockdata.ui;
+package com.vaadin.demo.stockdata.ui.data;
 
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.symbol.Symbol;
 
