@@ -1,4 +1,4 @@
-package com.vaadin.demo.stockdata.ui;
+package com.vaadin.demo.stockdata.ui.util;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;

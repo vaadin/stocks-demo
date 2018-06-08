@@ -20,6 +20,7 @@ public class MainView extends HorizontalLayout {
     setSpacing(true);
 
     StockList stockList = new StockList();
+    stockList.getElement().getStyle().set("flex-shrink", "0");
     StockDetails stockDetails = new StockDetails();
     stockList.addSelectedListener(stockDetails);
 

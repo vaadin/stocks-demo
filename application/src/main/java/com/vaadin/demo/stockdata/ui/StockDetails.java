@@ -2,11 +2,14 @@ package com.vaadin.demo.stockdata.ui;
 
 import com.vaadin.demo.stockdata.backend.db.demodata.stockdata.symbol.Symbol;
 import com.vaadin.demo.stockdata.backend.service.Service;
+import com.vaadin.demo.stockdata.ui.components.StockChart;
+import com.vaadin.demo.stockdata.ui.util.MoneyFormatter;
+import com.vaadin.demo.stockdata.ui.util.ServiceDirectory;
 import com.vaadin.flow.component.Text;
-
-import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.events.XAxesExtremesSetEvent;
-import com.vaadin.flow.component.charts.model.*;
+import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.OhlcItem;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -15,7 +18,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.disposables.Disposable;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -23,8 +25,6 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static java.util.Comparator.comparingDouble;
 
 @StyleSheet("frontend://styles/stock-details.css")
 public class StockDetails extends VerticalLayout implements StockList.SymbolSelectedListener {
@@ -41,6 +41,7 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
   StockDetails() {
     addClassName("stock-details");
     setSizeFull();
+    setSpacing(true);
 
     showNoSymbolSelected();
   }
@@ -62,6 +63,7 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
       showNoSymbolSelected();
     }
 
+    // Todo: Remove when https://github.com/vaadin/vaadin-charts-flow/issues/188 gets fixed
     addDetachListener(detach -> {
       if (subscription != null) {
         subscription.dispose();
@@ -107,50 +109,14 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
   private void addDetailChart(Symbol symbol) {
     if (subscription != null) subscription.dispose();
 
-    Chart chart = new Chart();
-    chart.setTimeline(true);
-
-    Configuration configuration = chart.getConfiguration();
-    configuration.getChart().setType(ChartType.LINE);
-    configuration.getTitle().setText(null);
-
-    YAxis yAxis = new YAxis();
-    Labels label = new Labels();
-    label.setFormatter("function() { return (this.value > 0 ? ' + ' : '') + this.value + '%'; }");
-    yAxis.setLabels(label);
-
-    PlotLine plotLine = new PlotLine();
-    plotLine.setValue(2);
-    yAxis.setPlotLines(plotLine);
-    configuration.addyAxis(yAxis);
-
-    Tooltip tooltip = new Tooltip();
-    tooltip.setPointFormat("<span>Stock value</span>: <b>{point.y}</b> ({point.change}%)<br/>");
-    tooltip.setValueDecimals(2);
-    configuration.setTooltip(tooltip);
+    StockChart chart = new StockChart();
 
     DataSeries dataSeries = new DataSeries();
     dataSeries.setName("Value");
     dataSeries.setData(getSymbolData(symbol, LocalDateTime.MIN, LocalDateTime.MAX));
-    configuration.setSeries(dataSeries);
+    chart.getConfiguration().setSeries(dataSeries);
 
-
-    PlotOptionsOhlc plotOptions = new PlotOptionsOhlc();
-    plotOptions.setAnimation(false);
-    configuration.setPlotOptions(plotOptions);
-
-    RangeSelector rangeSelector = new RangeSelector();
-    // Enable this to have a range selector and style with CSS or use a vaadin-date-picker.
-    rangeSelector.setEnabled(false);
-    configuration.setRangeSelector(rangeSelector);
-
-    Navigator navigator = new Navigator();
-    navigator.setAdaptToUpdatedData(false);
-    configuration.setNavigator(navigator);
-
-    chart.setWidth("100%");
-
-
+    // TODO: Remove when https://github.com/vaadin/vaadin-charts-flow/issues/188 gets fixed
     Flowable<XAxesExtremesSetEvent> flow = Flowable.create(emitter ->
             chart.addXAxesExtremesSetListener(emitter::onNext),
         BackpressureStrategy.LATEST);
@@ -162,12 +128,9 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
               timestampToLocalDateTime(event.getMinimum()),
               timestampToLocalDateTime(event.getMaximum()));
           dataSeries.setData(zoomedData);
-          Pair<Number, Number> newMinMax = findMinMax(dataSeries);
 
-          getUI().ifPresent(ui -> ui.access(() -> {
-            dataSeries.updateSeries();
-//            configuration.fireAxesRescaled(yAxis, newMinMax.getLeft(), newMinMax.getRight(), true, false);
-          }));
+          // TODO: remove when the debouncing is done on the client
+          getUI().ifPresent(ui -> ui.access(dataSeries::updateSeries));
         });
 
     add(chart);
@@ -178,11 +141,5 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
     return Instant.ofEpochMilli(jsTimestamp.longValue()).atZone(ZoneId.systemDefault()).toLocalDateTime();
   }
 
-  private Pair<Number, Number> findMinMax(DataSeries dataSeries) {
-    List<DataSeriesItem> data = dataSeries.getData();
-    Number min = data.stream().map(DataSeriesItem::getLow).min(comparingDouble(Number::intValue)).orElse(0.0);
-    Number max = data.stream().map(DataSeriesItem::getHigh).max(comparingDouble(Number::intValue)).orElse(0.0);
-    return Pair.of(Math.max(0, min.intValue() - 15), Math.min(100, max.intValue() + 15));
-  }
 
 }
