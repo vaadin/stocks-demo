@@ -92,7 +92,7 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
 
 
   private List<DataSeriesItem> getSymbolData(Symbol symbol, LocalDateTime startDate, LocalDateTime endDate) {
-    List<DataSeriesItem> items = service.getHistoryData(symbol, startDate, endDate, DATA_POINT_BATCH_SIZE)
+    return service.getHistoryData(symbol, startDate, endDate, DATA_POINT_BATCH_SIZE)
         .map(dataPoint -> {
           OhlcItem ohlcItem = new OhlcItem();
           ohlcItem.setOpen(dataPoint.getOpen() / 100.0);
@@ -102,7 +102,6 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
           ohlcItem.setX(Instant.ofEpochSecond(dataPoint.getTimeStamp()));
           return ohlcItem;
         }).collect(Collectors.toList());
-    return items;
   }
 
   private void addDetailChart(Symbol symbol) {
@@ -167,12 +166,9 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
 
           getUI().ifPresent(ui -> ui.access(() -> {
             dataSeries.updateSeries();
-            configuration.fireAxesRescaled(yAxis, newMinMax.getLeft(), newMinMax.getRight(), true, false);
+//            configuration.fireAxesRescaled(yAxis, newMinMax.getLeft(), newMinMax.getRight(), true, false);
           }));
-
-
         });
-
 
     add(chart);
     expand(chart);

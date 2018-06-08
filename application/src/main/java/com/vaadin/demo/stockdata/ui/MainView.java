@@ -24,6 +24,7 @@ public class MainView extends HorizontalLayout {
     stockList.addSelectedListener(stockDetails);
 
     add(stockList, stockDetails);
+    expand(stockDetails);
   }
 
 }

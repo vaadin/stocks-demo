@@ -33,11 +33,10 @@ public class StockList extends VerticalLayout {
 
   StockList() {
     setHeight("100%");
+    setWidth("400px");
     getThemeList().add("dark");
     addSearchField();
     addGrid();
-    setupGridDataProvider();
-    setupListeners();
   }
 
 
@@ -48,11 +47,23 @@ public class StockList extends VerticalLayout {
     searchField.setPlaceholder("Search by stocks");
     searchField.setValueChangeMode(ValueChangeMode.EAGER);
 
+    // Tell the grid to update based on the new filter
+    searchField.addValueChangeListener(event -> {
+      this.filter = event.getValue().toLowerCase();
+      grid.getDataProvider().refreshAll();
+    });
+
     add(searchField);
   }
 
   private void addGrid() {
     grid = new Grid<>();
+    grid.setSizeFull();
+    grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+    grid.setPageSize(20);
+    grid.getElement().setAttribute("theme", "no-border no-row-borders");
+
+    // Configure columns
     // Render the stock item rows. Using templates instead of full components aid performance, a lot!
     grid.addColumn(TemplateRenderer.<StockItem>of(
         "<small><b>[[item.nasdaq]]</b></small>")
@@ -72,16 +83,7 @@ public class StockList extends VerticalLayout {
         .withProperty("trendColor", StockItem::getTrendColor))
         .setWidth("65px");
 
-    grid.setHeight("100%");
-    grid.setWidth("370px");
-    grid.setSelectionMode(Grid.SelectionMode.SINGLE);
-    grid.getElement().setAttribute("theme", "no-border no-row-borders");
-    add(grid);
-  }
-
-
-  private void setupGridDataProvider() {
-    grid.setPageSize(20);
+    // Define how we should fetch data as needed from our Speedment backend
     grid.setDataProvider(DataProvider.fromCallbacks(
         dataQuery -> {
           Stream<Symbol> symbolStream = getSymbolStream();
@@ -92,7 +94,15 @@ public class StockList extends VerticalLayout {
         countQuery ->
             (int) getSymbolStream().count()
     ));
+
+    // React to selection events on the grid
+    grid.addSelectionListener(event -> event.getFirstSelectedItem().ifPresent(item -> {
+      listeners.forEach(l -> l.symbolSelected(item.getSymbol()));
+    }));
+
+    add(grid);
   }
+
 
   private Stream<Symbol> getSymbolStream() {
     return service.getSymbols()
@@ -100,11 +110,11 @@ public class StockList extends VerticalLayout {
   }
 
 
+  // Collect all relevant symbol data into a StockItem
   private StockItem toStockItem(Symbol symbol) {
     StockItem stockItem = new StockItem();
     stockItem.setSymbol(symbol);
 
-    // FIXME: get today's symbols
     List<Double> history = service.getHistoryData(symbol, LocalDateTime.MIN, LocalDateTime.MAX, 10)
         .map(p -> p.getClose() / 100.0)
         .collect(Collectors.toList());
@@ -113,17 +123,6 @@ public class StockList extends VerticalLayout {
     service.getMostRecentDataPoint(symbol).ifPresent(data -> stockItem.setCurrentValue(MoneyFormatter.format(data.getClose())));
 
     return stockItem;
-  }
-
-  private void setupListeners() {
-    searchField.addValueChangeListener(event -> {
-      this.filter = event.getValue().toLowerCase();
-      grid.getDataProvider().refreshAll();
-    });
-
-    grid.addSelectionListener(event -> event.getFirstSelectedItem().ifPresent(item -> {
-      listeners.forEach(l -> l.symbolSelected(item.getSymbol()));
-    }));
   }
 
   void addSelectedListener(SymbolSelectedListener listener) {
