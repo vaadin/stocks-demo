@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 class AlphaVantageClient {
@@ -20,13 +21,13 @@ class AlphaVantageClient {
         = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=%s&apikey=%s&outputsize=%s";
     private static final String TIME_SERIES_KEY = "Time Series (Daily)";
 
-    public enum Size {
+    public enum FetchSize {
         FULL("full"),
         COMPACT("compact");
 
         private final String restOutputSize;
 
-        Size(String restOutputSize) {
+        FetchSize(String restOutputSize) {
             this.restOutputSize = restOutputSize;
         }
 
@@ -39,12 +40,11 @@ class AlphaVantageClient {
 
     public AlphaVantageClient() {
         this.client = ClientBuilder.newBuilder().build();
-
     }
 
     @SuppressWarnings("unchecked")
-    private synchronized Map<String, Map<String, String>> getTimeSeries(String apiKey, Symbol symbol, Size size) {
-        final String uri = String.format(REST_URI, symbol.getTicker(), apiKey, size.getRestOutputSize());
+    private synchronized Map<String, Map<String, String>> getTimeSeries(String apiKey, Symbol symbol, FetchSize fetchSize) {
+        final String uri = String.format(REST_URI, symbol.getTicker(), apiKey, fetchSize.getRestOutputSize());
 
         int retries = 12;
         Exception lastException;
@@ -53,8 +53,7 @@ class AlphaVantageClient {
                 Map<String, Map> entries = client
                     .target(uri)
                     .request(MediaType.APPLICATION_JSON)
-                    .get(new GenericType<Map<String, Map>>() {
-                    });
+                    .get(new GenericType<Map<String, Map>>() {});
                 return (Map<String, Map<String, String>>) entries.get(TIME_SERIES_KEY);
             } catch (Exception e) {
                 lastException = e;
@@ -74,32 +73,28 @@ class AlphaVantageClient {
         return Collections.emptyMap();
     }
 
-    Stream<DataPoint> getDataPoints(String apiKey, Symbol symbol) {
-        // return getDataPoints(apiKey, symbol, Size.COMPACT);  //  For a smaller database
-        return getDataPoints(apiKey, symbol, Size.FULL);
-    }
-
-    private Stream<DataPoint> getDataPoints(String apiKey, Symbol symbol, Size size) {
-        Map<String, Map<String, String>> map = getTimeSeries(apiKey, symbol, size);
+    public Stream<DataPoint> getDataPoints(String apiKey, Symbol symbol, FetchSize fetchSize) {
+        Map<String, Map<String, String>> map = getTimeSeries(apiKey, symbol, fetchSize);
         return map.entrySet().stream()
-            .flatMap(entry -> {
-                Map<String, String> DataPoint = entry.getValue();
-                final DataPointImpl info = new DataPointImpl();
-                info.setSymbolId(symbol.getId());
-                info.setOpen((int) (Float.valueOf(DataPoint.get("1. open")) * 100));
-                info.setHigh((int) (Float.valueOf(DataPoint.get("2. high")) * 100));
-                info.setLow((int) (Float.valueOf(DataPoint.get("3. low")) * 100));
-                info.setClose((int) (Float.valueOf(DataPoint.get("5. adjusted close")) * 100));
-                info.setVolume(Long.valueOf(DataPoint.get("6. volume")));
+            .map(entry -> {
+                Map<String, String> pointMap = entry.getValue();
+                final DataPointImpl dataPoint = new DataPointImpl();
+                dataPoint.setSymbolId(symbol.getId());
+                dataPoint.setOpen((int) (Double.valueOf(pointMap.get("1. open")) * 100));
+                dataPoint.setHigh((int) (Double.valueOf(pointMap.get("2. high")) * 100));
+                dataPoint.setLow((int) (Double.valueOf(pointMap.get("3. low")) * 100));
+                dataPoint.setClose((int) (Double.valueOf(pointMap.get("5. adjusted close")) * 100));
+                dataPoint.setVolume(Long.valueOf(pointMap.get("6. volume")));
                 try {
-                    info.setTimeStamp(TimeUtil.dateStringToSecondsSinceEpoch(entry.getKey()));
-                    return Stream.of(info);
+                    dataPoint.setTimeStamp(TimeUtil.dateStringToSecondsSinceEpoch(entry.getKey()));
+                    return (DataPoint) dataPoint;
                 } catch (ParseException e) {
                     System.out.println("Skipping data with broken date");
                     e.printStackTrace();
-                    return Stream.empty();
+                    return null;
                 }
-            });
+            })
+            .filter(Objects::nonNull);
     }
 
 }

@@ -16,6 +16,8 @@ services:
   app:
     build:
       context: application
+    environment:
+      SPEEDMENT_LICENSE: ${SPEEDMENT_LICENSE}
     depends_on:
       db:
         condition: service_healthy

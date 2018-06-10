@@ -24,8 +24,6 @@ import java.util.stream.Stream;
 
 public class ServiceImpl implements Service {
 
-    private static final String LICENSE_KEY = "HhD32Q3KophEmEYFYXBpLW1hbmFnZXIsZGF0YXN0b3JlLGRiMixtc3NxbCxvcmFjbGUscmVhY3Rvcix2aXJ0dWFsLWNvbHVtbnM7PG7WjvzDDv08zjh1gSR7EzdSBlFloOYuvMGIz1/+gsGClX0w/u9o+5hl6I6lVgz20/HP8K81NGHUUiU+lW/Hf3wM4RJybQ6be9OjgKa86aDwjXGGi8k8J/CzAx/vk7YZMUSXp1pRTxrRoRT7FpkHg0sKH2qM2kTR6tyfph8mC5I=";
-
     /**
      * The maximum granularity step of the batch. If the user requests a large range and actual data is confined in a small
      * sub sequence of the requested range, the granularity given by the large range will sieve out too much data yielding
@@ -53,23 +51,23 @@ public class ServiceImpl implements Service {
         dataPoints = getDataPointManager(true);
     }
 
-    private Speedment createApp(boolean withAccelleration) {
+    private Speedment createApp(boolean withAcceleration) {
         StockdataApplicationBuilder builder = new StockdataApplicationBuilder()
             .withUsername(user)
             .withPassword(password)
             .withIpAddress(hostIp)
             .withLogging(ApplicationBuilder.LogType.STREAM);
 
-        if (withAccelleration) {
+        if (withAcceleration) {
             builder = builder
-                .withParam("licenseKey", LICENSE_KEY)
+                .withParam("licenseKey", getLicenseKey())
                 .withBundle(VirtualColumnBundle.class)
                 .withBundle(DataStoreBundle.class);
         }
 
         final StockdataApplication application = builder.build();
 
-        if (withAccelleration) {
+        if (withAcceleration) {
             DataStoreComponent dataStoreComponent = application.getOrThrow(DataStoreComponent.class);
             Executors.newSingleThreadScheduledExecutor()
                 .scheduleWithFixedDelay(dataStoreComponent::load,2, 2, TimeUnit.MINUTES);
@@ -77,6 +75,11 @@ public class ServiceImpl implements Service {
         }
 
         return application;
+    }
+
+    private String getLicenseKey() {
+        final String lincenseKey = System.getenv("SPEEDMENT_LICENSE").trim();
+        return lincenseKey.trim();
     }
 
     @Override
