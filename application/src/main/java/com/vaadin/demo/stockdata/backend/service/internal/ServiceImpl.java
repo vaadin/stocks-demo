@@ -2,7 +2,9 @@ package com.vaadin.demo.stockdata.backend.service.internal;
 
 import com.speedment.enterprise.datastore.runtime.DataStoreBundle;
 import com.speedment.enterprise.datastore.runtime.DataStoreComponent;
+import com.speedment.enterprise.datastore.runtime.StreamSupplierComponentDecorator;
 import com.speedment.enterprise.datastore.runtime.collector.SieveCollector;
+import com.speedment.enterprise.sharding.MutableShardedSpeedment;
 import com.speedment.enterprise.virtualcolumn.runtime.VirtualColumnBundle;
 import com.speedment.runtime.core.ApplicationBuilder;
 import com.speedment.runtime.core.Speedment;
@@ -18,8 +20,10 @@ import com.vaadin.demo.stockdata.backend.service.Service;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class ServiceImpl implements Service {
@@ -36,8 +40,8 @@ public class ServiceImpl implements Service {
     private static final int MAXIMUM_GRANULARITY_STEP = (int) TimeUnit.SECONDS.convert(1, TimeUnit.DAYS);
 
     private final Speedment sqlApp;
-    private final Speedment acceleratedApp;
-    private DataPointManager dataPoints;
+    private final MutableShardedSpeedment<Symbol> shardedApp;
+    private Function<Symbol, Stream<DataPoint>> dataPointProducer;
     private final String user;
     private final String password;
     private final String hostIp;
@@ -46,50 +50,76 @@ public class ServiceImpl implements Service {
         this.hostIp = hostIp;
         this.user = user;
         this.password = password;
-        sqlApp = createApp(false);
-        acceleratedApp = createApp(true);
-        dataPoints = getDataPointManager(true);
+        sqlApp = createSqlApp();
+        shardedApp = MutableShardedSpeedment.create();
+        dataPointProducer = getDataPointSupplier(true);
     }
 
-    private Speedment createApp(boolean withAcceleration) {
+    private Speedment createSqlApp() {
         StockdataApplicationBuilder builder = new StockdataApplicationBuilder()
             .withUsername(user)
             .withPassword(password)
             .withIpAddress(hostIp)
             .withLogging(ApplicationBuilder.LogType.STREAM);
 
-        if (withAcceleration) {
-            builder = builder
-                .withParam("licenseKey", getLicenseKey())
-                .withBundle(VirtualColumnBundle.class)
-                .withBundle(DataStoreBundle.class);
-        }
+        return builder.build();
+    }
+
+    private Speedment acceleratedApplicationBuilder(Symbol symbol) {
+        final StockdataApplicationBuilder builder = new StockdataApplicationBuilder()
+            .withUsername(user)
+            .withPassword(password)
+            .withIpAddress(hostIp)
+            .withLogging(ApplicationBuilder.LogType.STREAM)
+            .withParam("licenseKey", getLicenseKey())
+            .withBundle(VirtualColumnBundle.class)
+            .withSkipLogoPrintout()
+            .withBundle(DataStoreBundle.class);
 
         final StockdataApplication application = builder.build();
 
-        if (withAcceleration) {
-            DataStoreComponent dataStoreComponent = application.getOrThrow(DataStoreComponent.class);
-            Executors.newSingleThreadScheduledExecutor()
-                .scheduleWithFixedDelay(dataStoreComponent::load,2, 2, TimeUnit.MINUTES);
-            dataStoreComponent.load();  // make first load in current Thread to ensure we have loaded when returning
-        }
+        DataStoreComponent dataStoreComponent = application.getOrThrow(DataStoreComponent.class);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        // A decorator to filter out the data for this particular shard
+        final StreamSupplierComponentDecorator streamDecorator = StreamSupplierComponentDecorator.builder()
+            .withStreamDecorator(DataPointManager.IDENTIFIER,
+                s -> s.filter(DataPoint.SYMBOL_ID.equal(symbol.getId())))
+            .build();
+
+        // make first load in current Thread to ensure we have loaded when returning
+        dataStoreComponent.load(executor, streamDecorator);
+
+        // Setup periodic reload of the data store
+        Executors.newSingleThreadScheduledExecutor()
+            .scheduleWithFixedDelay(() ->
+                dataStoreComponent.reload(executor, streamDecorator),2, 2, TimeUnit.MINUTES);
 
         return application;
     }
 
     private String getLicenseKey() {
-        final String lincenseKey = System.getenv("SPEEDMENT_LICENSE").trim();
-        return lincenseKey.trim();
+        final String licenseKey = System.getenv("SPEEDMENT_LICENSE").trim();
+        return licenseKey.trim();
     }
 
     @Override
     public Service withAcceleration(boolean accelerate) {
-        dataPoints = getDataPointManager(accelerate);
+        dataPointProducer = getDataPointSupplier(accelerate);
         return this;
     }
 
-    private DataPointManager getDataPointManager(boolean accelerate) {
-        return accelerate ? acceleratedApp.getOrThrow(DataPointManager.class) : sqlApp.getOrThrow(DataPointManager.class);
+    private Function<Symbol, Stream<DataPoint>> getDataPointSupplier(boolean accelerate) {
+        return accelerate
+            ?
+            symbol -> shardedApp
+                .computeIfAbsent(symbol, this::acceleratedApplicationBuilder)
+                .getOrThrow(DataPointManager.class)
+                .stream()
+            :
+            symbol -> sqlApp.getOrThrow(DataPointManager.class)
+                .stream()
+                .filter(DataPoint.SYMBOL_ID.equal(symbol.getId()));
     }
 
     @Override
@@ -105,8 +135,7 @@ public class ServiceImpl implements Service {
             MAXIMUM_GRANULARITY_STEP,
             Math.max(1, (int)step)
         );
-        return dataPoints.stream()
-            .filter(DataPoint.SYMBOL_ID.equal(symbol.getId()))
+        return dataPointProducer.apply(symbol)
             .filter(DataPoint.TIME_STAMP.between(start, end, Inclusion.START_INCLUSIVE_END_INCLUSIVE))
             .sorted(DataPoint.TIME_STAMP)
             .collect(SieveCollector.of(
@@ -118,8 +147,7 @@ public class ServiceImpl implements Service {
 
     @Override
     public Optional<DataPoint> getMostRecentDataPoint(Symbol symbol) {
-        return dataPoints.stream()
-            .filter(DataPoint.SYMBOL_ID.equal(symbol.getId()))
+        return dataPointProducer.apply(symbol)
             .sorted(DataPoint.TIME_STAMP.comparator().reversed())
             .findFirst();
     }

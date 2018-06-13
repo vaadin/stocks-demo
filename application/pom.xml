@@ -48,6 +48,11 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.speedment.enterprise</groupId>
+            <artifactId>sharding</artifactId>
+            <version>${speedment.enterprise.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>javax.servlet</groupId>
