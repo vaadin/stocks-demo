@@ -128,38 +128,4 @@ public class ServiceImpl implements Service {
     public Stream<Symbol> getSymbols() {
         return sqlApp.getOrThrow(SymbolManager.class).stream();
     }
-
-    public static void main(String[] args) {
-        final String host = "localhost";
-        final String user = "root";
-        final String password = "root";
-        Service service = Service.create(host, user, password).withAcceleration(true);
-
-        Optional<Symbol> symbolOptional = service.getSymbols().findAny();
-        if (symbolOptional.isPresent()) {
-            Symbol symbol = symbolOptional.get();
-            System.out.println("10 oldest data for " + symbol.getName());
-            service.getHistoryData(symbolOptional.get(), LocalDateTime.MIN, LocalDateTime.MAX, 1)
-                .limit(10)
-                .forEachOrdered(System.out::println);
-
-            System.out.println("Most recent data for all symbols that have data:");
-            service.getSymbols()
-                .map(service::getMostRecentDataPoint)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .forEach(System.out::println);
-
-//            Portfolio portfolio = service.getPortfolio();
-//            BigDecimal preValue = portfolio.getCurrentValue();
-//            final int amount = 10000;
-//            portfolio.addInvestment(symbol, amount);
-//            BigDecimal postValue = portfolio.getCurrentValue();
-//            System.out.println("Adding " + amount + " of " + symbol.getName() + " increses value from " + preValue + " to " + postValue);
-//            portfolio.addInvestment(symbol, -amount);
-//            assert preValue.equals(portfolio.getCurrentValue());
-        } else {
-            System.out.println("No symbols in database");
-        }
-    }
 }
