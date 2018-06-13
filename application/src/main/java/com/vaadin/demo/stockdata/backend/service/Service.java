@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Service for  getting historical data.
+ * Service for getting historical data.
  * This demo app has no concept of users, so the entire database is a
  * single user.
  */
