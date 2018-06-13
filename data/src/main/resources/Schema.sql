@@ -9,6 +9,7 @@ CREATE table symbol (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- The investment table is currently not used by this demo
 CREATE table investment (
 	id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
     symbol_id SMALLINT UNSIGNED NOT NULL,
