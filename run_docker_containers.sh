@@ -8,7 +8,7 @@ if [[ $# -eq 0 ]]; then
 fi
 
 function trialinfo {
-    echo "A free trial license can be obtained from the initializer page: https://www.speedment.com/initializer/"
+    echo "A free trial license can be obtained from the initializer page: https://www.speedment.com/initializer/?tryForFree"
     echo "Please put the obtained license key in a file named ${SPEEDMENT_LICENSE_FILE}"
     exit
 }
