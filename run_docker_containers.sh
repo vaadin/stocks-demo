@@ -14,12 +14,12 @@ function trialinfo {
 }
 
 # This key is long, so we keep it in a file
-SPEEDMENT_LICENSE_FILE=license.txt
+SPEEDMENT_LICENSE_FILE=application/license.txt
 USER_LICENSE=~/.speedment/.licenses
 
 if [[ ! -s ${SPEEDMENT_LICENSE_FILE} ]] && [[ -s ${USER_LICENSE} ]]; then
-    tail -1 ${USER_LICENSE} > ${SPEEDMENT_LICENSE_FILE}
-    echo "Trying to use the Speedment license found in ${USER_LICENSE}"
+    cp ${USER_LICENSE} ${SPEEDMENT_LICENSE_FILE}
+    echo "Will use the Speedment license found in ${USER_LICENSE}"
     echo "To use any other license for this demo, please modify the contents of file ${SPEEDMENT_LICENSE_FILE}"
 fi
 
@@ -28,18 +28,6 @@ if [[ ! -s ${SPEEDMENT_LICENSE_FILE} ]]; then
     trialinfo
 fi
 
-if [[ $(wc -c < ${SPEEDMENT_LICENSE_FILE}) -lt 100 ]]; then
-    echo "The Speedment Enterprise license in ${SPEEDMENT_LICENSE_FILE} seems to be broken. Please replace it."
-    trialinfo
-fi
-
-if [[ ! $(wc -l < ${SPEEDMENT_LICENSE_FILE}) -eq 1 ]]; then
-    echo "The Speedment Enterprise license in ${SPEEDMENT_LICENSE_FILE} shall only have a single license on a single line. Please update the file."
-    trialinfo
-fi
-
-
-export SPEEDMENT_LICENSE=$(cat ${SPEEDMENT_LICENSE_FILE})
 export STOCKS_API_KEY=$1
 
 mvn -q clean package

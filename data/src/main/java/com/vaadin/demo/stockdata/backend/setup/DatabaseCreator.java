@@ -39,7 +39,7 @@ public class DatabaseCreator implements AutoCloseable {
     private static final String CONNECTION_URL_WITH_DB = "jdbc:mysql://%s/stockdata?useSSL=false&useServerPrepStmts=true";
     private static final String SCHEMA_SQL_RESOURCE_NAME = "/Schema.sql";
     private static final String TICKER_LIST_RESOURCE_NAME = "/nasdaq_tickers.csv";
-    private static final long SYMBOL_COUNT_LIMIT = 20;  // Long.MAX_VALUE;
+    private static final long SYMBOL_COUNT_LIMIT = 100;  // Long.MAX_VALUE;
     private static final long MAX_PRESENT_WHEN_FETCHING_NEW = 100_000;
 
     private final String hostIp;

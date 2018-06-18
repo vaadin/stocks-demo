@@ -7,4 +7,4 @@ target
 .settings
 rebel.xml
 **/dependency-reduced-pom.xml
-/license.txt
+application/license.txt
