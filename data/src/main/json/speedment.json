@@ -1,0 +1,359 @@
+{
+  "config" : {
+    "expanded" : true,
+    "appId" : "c4d0985a-bead-471b-98a3-ad2813c34c61",
+    "companyName" : "vaadin",
+    "name" : "stockdata",
+    "packageLocation" : "target/generated-sources/java",
+    "id" : "stockdata",
+    "packageName" : "com.vaadin.demo.stockdata.backend.db",
+    "dbmses" : [
+      {
+        "expanded" : true,
+        "port" : 3306,
+        "schemas" : [
+          {
+            "expanded" : true,
+            "tables" : [
+              {
+                "expanded" : true,
+                "primaryKeyColumns" : [
+                  {
+                    "expanded" : true,
+                    "name" : "symbol_id",
+                    "id" : "symbol_id",
+                    "ordinalPosition" : 1
+                  },
+                  {
+                    "expanded" : true,
+                    "name" : "time_stamp",
+                    "id" : "time_stamp",
+                    "ordinalPosition" : 2
+                  }
+                ],
+                "indexes" : [
+                  {
+                    "expanded" : true,
+                    "unique" : true,
+                    "name" : "PRIMARY",
+                    "indexColumns" : [
+                      {
+                        "orderType" : "ASC",
+                        "expanded" : true,
+                        "name" : "symbol_id",
+                        "id" : "symbol_id",
+                        "ordinalPosition" : 1
+                      },
+                      {
+                        "orderType" : "ASC",
+                        "expanded" : true,
+                        "name" : "time_stamp",
+                        "id" : "time_stamp",
+                        "ordinalPosition" : 2
+                      }
+                    ],
+                    "id" : "PRIMARY",
+                    "enabled" : true
+                  }
+                ],
+                "isView" : false,
+                "columns" : [
+                  {
+                    "nullable" : false,
+                    "unindexed" : false,
+                    "autoIncrement" : false,
+                    "biDirectional" : false,
+                    "ordinalPosition" : 1,
+                    "enabled" : true,
+                    "databaseType" : "java.lang.Integer",
+                    "expanded" : true,
+                    "typeMapper" : "com.speedment.runtime.typemapper.primitive.PrimitiveTypeMapper",
+                    "name" : "symbol_id",
+                    "nullableImplementation" : "OPTIONAL",
+                    "id" : "symbol_id"
+                  },
+                  {
+                    "nullable" : false,
+                    "unindexed" : false,
+                    "autoIncrement" : false,
+                    "biDirectional" : false,
+                    "ordinalPosition" : 2,
+                    "enabled" : true,
+                    "databaseType" : "java.lang.Long",
+                    "expanded" : true,
+                    "typeMapper" : "com.speedment.runtime.typemapper.primitive.PrimitiveTypeMapper",
+                    "name" : "time_stamp",
+                    "nullableImplementation" : "OPTIONAL",
+                    "id" : "time_stamp"
+                  },
+                  {
+                    "nullable" : false,
+                    "unindexed" : true,
+                    "autoIncrement" : false,
+                    "biDirectional" : false,
+                    "ordinalPosition" : 3,
+                    "enabled" : true,
+                    "databaseType" : "java.lang.Long",
+                    "expanded" : true,
+                    "typeMapper" : "com.speedment.runtime.typemapper.primitive.PrimitiveTypeMapper",
+                    "name" : "open",
+                    "nullableImplementation" : "OPTIONAL",
+                    "id" : "open"
+                  },
+                  {
+                    "nullable" : false,
+                    "unindexed" : true,
+                    "autoIncrement" : false,
+                    "biDirectional" : false,
+                    "ordinalPosition" : 4,
+                    "enabled" : true,
+                    "databaseType" : "java.lang.Long",
+                    "expanded" : true,
+                    "typeMapper" : "com.speedment.runtime.typemapper.primitive.PrimitiveTypeMapper",
+                    "name" : "close",
+                    "nullableImplementation" : "OPTIONAL",
+                    "id" : "close"
+                  },
+                  {
+                    "nullable" : false,
+                    "unindexed" : true,
+                    "autoIncrement" : false,
+                    "biDirectional" : false,
+                    "ordinalPosition" : 5,
+                    "enabled" : true,
+                    "databaseType" : "java.lang.Long",
+                    "expanded" : true,
+                    "typeMapper" : "com.speedment.runtime.typemapper.primitive.PrimitiveTypeMapper",
+                    "name" : "high",
+                    "nullableImplementation" : "OPTIONAL",
+                    "id" : "high"
+                  },
+                  {
+                    "nullable" : false,
+                    "unindexed" : true,
+                    "autoIncrement" : false,
+                    "biDirectional" : false,
+                    "ordinalPosition" : 6,
+                    "enabled" : true,
+                    "databaseType" : "java.lang.Long",
+                    "expanded" : true,
+                    "typeMapper" : "com.speedment.runtime.typemapper.primitive.PrimitiveTypeMapper",
+                    "name" : "low",
+                    "nullableImplementation" : "OPTIONAL",
+                    "id" : "low"
+                  },
+                  {
+                    "nullable" : false,
+                    "unindexed" : true,
+                    "autoIncrement" : false,
+                    "biDirectional" : false,
+                    "ordinalPosition" : 7,
+                    "enabled" : true,
+                    "databaseType" : "java.lang.Long",
+                    "expanded" : true,
+                    "typeMapper" : "com.speedment.runtime.typemapper.primitive.PrimitiveTypeMapper",
+                    "name" : "volume",
+                    "nullableImplementation" : "OPTIONAL",
+                    "id" : "volume"
+                  }
+                ],
+                "name" : "data_point",
+                "id" : "data_point",
+                "enabled" : true
+              },
+              {
+                "expanded" : true,
+                "foreignKeys" : [
+                  {
+                    "expanded" : false,
+                    "foreignKeyColumns" : [
+                      {
+                        "foreignDatabaseName" : "stockdata",
+                        "foreignSchemaName" : "stockdata",
+                        "expanded" : true,
+                        "name" : "symbol_id",
+                        "foreignColumnName" : "id",
+                        "id" : "symbol_id",
+                        "foreignTableName" : "symbol",
+                        "ordinalPosition" : 1
+                      }
+                    ],
+                    "name" : "fk_symbol_id",
+                    "id" : "fk_symbol_id",
+                    "enabled" : true
+                  }
+                ],
+                "primaryKeyColumns" : [
+                  {
+                    "expanded" : true,
+                    "name" : "id",
+                    "id" : "id",
+                    "ordinalPosition" : 1
+                  }
+                ],
+                "indexes" : [
+                  {
+                    "expanded" : false,
+                    "unique" : true,
+                    "name" : "PRIMARY",
+                    "indexColumns" : [
+                      {
+                        "orderType" : "ASC",
+                        "expanded" : true,
+                        "name" : "id",
+                        "id" : "id",
+                        "ordinalPosition" : 1
+                      }
+                    ],
+                    "id" : "PRIMARY",
+                    "enabled" : true
+                  },
+                  {
+                    "expanded" : false,
+                    "unique" : false,
+                    "name" : "idx_fk_symbol_id",
+                    "indexColumns" : [
+                      {
+                        "orderType" : "ASC",
+                        "expanded" : true,
+                        "name" : "symbol_id",
+                        "id" : "symbol_id",
+                        "ordinalPosition" : 1
+                      }
+                    ],
+                    "id" : "idx_fk_symbol_id",
+                    "enabled" : true
+                  }
+                ],
+                "isView" : false,
+                "columns" : [
+                  {
+                    "nullable" : false,
+                    "unindexed" : false,
+                    "autoIncrement" : true,
+                    "biDirectional" : false,
+                    "ordinalPosition" : 1,
+                    "enabled" : true,
+                    "databaseType" : "java.lang.Integer",
+                    "expanded" : true,
+                    "typeMapper" : "com.speedment.runtime.typemapper.primitive.PrimitiveTypeMapper",
+                    "name" : "id",
+                    "nullableImplementation" : "OPTIONAL",
+                    "id" : "id"
+                  },
+                  {
+                    "nullable" : false,
+                    "unindexed" : false,
+                    "autoIncrement" : false,
+                    "biDirectional" : false,
+                    "ordinalPosition" : 2,
+                    "enabled" : true,
+                    "databaseType" : "java.lang.Integer",
+                    "expanded" : true,
+                    "typeMapper" : "com.speedment.runtime.typemapper.primitive.PrimitiveTypeMapper",
+                    "name" : "symbol_id",
+                    "nullableImplementation" : "OPTIONAL",
+                    "id" : "symbol_id"
+                  },
+                  {
+                    "nullable" : false,
+                    "unindexed" : false,
+                    "autoIncrement" : false,
+                    "biDirectional" : false,
+                    "ordinalPosition" : 3,
+                    "enabled" : true,
+                    "databaseType" : "java.lang.Long",
+                    "expanded" : true,
+                    "typeMapper" : "com.speedment.runtime.typemapper.primitive.PrimitiveTypeMapper",
+                    "name" : "quantity",
+                    "nullableImplementation" : "OPTIONAL",
+                    "id" : "quantity"
+                  }
+                ],
+                "name" : "investment",
+                "alias" : "InvestmentData",
+                "id" : "investment",
+                "enabled" : true
+              },
+              {
+                "expanded" : true,
+                "primaryKeyColumns" : [
+                  {
+                    "expanded" : true,
+                    "name" : "id",
+                    "id" : "id",
+                    "ordinalPosition" : 1
+                  }
+                ],
+                "indexes" : [
+                  {
+                    "expanded" : false,
+                    "unique" : true,
+                    "name" : "PRIMARY",
+                    "indexColumns" : [
+                      {
+                        "orderType" : "ASC",
+                        "expanded" : true,
+                        "name" : "id",
+                        "id" : "id",
+                        "ordinalPosition" : 1
+                      }
+                    ],
+                    "id" : "PRIMARY",
+                    "enabled" : true
+                  }
+                ],
+                "isView" : false,
+                "columns" : [
+                  {
+                    "databaseType" : "java.lang.Integer",
+                    "expanded" : true,
+                    "typeMapper" : "com.speedment.runtime.typemapper.primitive.PrimitiveTypeMapper",
+                    "nullable" : false,
+                    "autoIncrement" : true,
+                    "name" : "id",
+                    "id" : "id",
+                    "ordinalPosition" : 1,
+                    "enabled" : true
+                  },
+                  {
+                    "databaseType" : "java.lang.String",
+                    "expanded" : true,
+                    "nullable" : false,
+                    "name" : "name",
+                    "id" : "name",
+                    "ordinalPosition" : 2,
+                    "enabled" : true
+                  },
+                  {
+                    "databaseType" : "java.lang.String",
+                    "expanded" : true,
+                    "nullable" : false,
+                    "name" : "ticker",
+                    "id" : "ticker",
+                    "ordinalPosition" : 3,
+                    "enabled" : true
+                  }
+                ],
+                "name" : "symbol",
+                "id" : "symbol",
+                "enabled" : true
+              }
+            ],
+            "name" : "stockdata",
+            "id" : "stockdata",
+            "enabled" : true
+          }
+        ],
+        "typeName" : "MySQL",
+        "ipAddress" : "127.0.0.1",
+        "name" : "stockdata",
+        "alias" : "demodata",
+        "id" : "stockdata",
+        "enabled" : true,
+        "username" : "root"
+      }
+    ],
+    "enabled" : true
+  }
+}
