@@ -71,7 +71,6 @@ public class ServiceImpl implements Service {
             .withPassword(password)
             .withIpAddress(hostIp)
             .withLogging(ApplicationBuilder.LogType.STREAM)
-            .withParam("licensePath", "/var/lib/jetty/webapps/.license")
             .withBundle(VirtualColumnBundle.class)
             .withSkipLogoPrintout()
             .withBundle(DataStoreBundle.class);
