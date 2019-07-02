@@ -22,12 +22,14 @@
 
         <!-- Dependencies -->
         <vaadin.version>10.0.0.rc5</vaadin.version>
-        <speedment.enterprise.version>3.1.2</speedment.enterprise.version>
+        <speedment.enterprise.version>3.1.16</speedment.enterprise.version>
         <vaadin.charts.version>6.0.0.rc2</vaadin.charts.version>
-        <mysql-version>5.1.42</mysql-version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <mysql-version>8.0.13</mysql-version>
         <junit.jupiter.version>5.0.2</junit.jupiter.version>
         <!-- Plugins -->
-        <jetty.version>9.3.7.v20160115</jetty.version>
+        <jetty.version>9.4.15.v20190215</jetty.version>
         <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
     </properties>
 

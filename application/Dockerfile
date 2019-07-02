@@ -1,4 +1,4 @@
-FROM jetty:9.4.9
+FROM jetty:9.4.18-jre11
 
 ENV STOCKS_MYSQL_HOST db
 

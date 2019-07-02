@@ -51,7 +51,7 @@ public class ServiceImpl implements Service {
         this.user = user;
         this.password = password;
         sqlApp = createSqlApp();
-        shardedApp = MutableShardedSpeedment.create();
+        shardedApp = MutableShardedSpeedment.create(Symbol.class);
         dataPointProducer = getDataPointSupplier(true);
     }
 
