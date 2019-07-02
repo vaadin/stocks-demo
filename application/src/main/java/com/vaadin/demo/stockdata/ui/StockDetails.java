@@ -6,6 +6,7 @@ import com.vaadin.demo.stockdata.backend.service.Service;
 import com.vaadin.demo.stockdata.ui.components.StockChart;
 import com.vaadin.demo.stockdata.ui.util.MoneyFormatter;
 import com.vaadin.demo.stockdata.ui.util.ServiceDirectory;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.charts.events.XAxesExtremesSetEvent;
 import com.vaadin.flow.component.charts.model.DataSeries;
@@ -120,25 +121,21 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
     dataSeries.setData(getSymbolData(symbol, LocalDateTime.MIN, LocalDateTime.MAX));
     chart.getConfiguration().setSeries(dataSeries);
 
-    // TODO: Remove when https://github.com/vaadin/vaadin-charts-flow/issues/188 gets fixed
-    Flowable<XAxesExtremesSetEvent> flow = Flowable.create(emitter ->
-            chart.addXAxesExtremesSetListener(emitter::onNext),
-        BackpressureStrategy.LATEST);
 
-    subscription = flow.debounce(500, TimeUnit.MILLISECONDS)
-        .subscribe(event -> {
+    //Use ComponentUtil to debounce the events - no need to hit the db on each
+    ComponentUtil.addListener(chart, XAxesExtremesSetEvent.class, event -> {
           List<DataSeriesItem> zoomedData = getSymbolData(symbol,
               toLocalDateTime(event.getMinimum()),
               toLocalDateTime(event.getMaximum()));
           dataSeries.setData(zoomedData);
-
-          // TODO: remove when the debouncing is done on the client
           getUI().ifPresent(ui -> ui.access(dataSeries::updateSeries));
-        });
+        },
+        r -> r.debounce(500));
 
     add(chart);
     expand(chart);
   }
+
 
   private LocalDateTime toLocalDateTime(Double jsTimestamp) {
     return Instant.ofEpochMilli(jsTimestamp.longValue()).atZone(ZoneId.systemDefault()).toLocalDateTime();

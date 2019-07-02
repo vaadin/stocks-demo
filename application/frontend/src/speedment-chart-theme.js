@@ -1,8 +1,8 @@
-<link rel="import" href="../bower_components/vaadin-charts/vaadin-chart-default-theme.html">
+import '@vaadin/vaadin-charts/vaadin-chart-default-theme.js'
+import '@polymer/polymer/lib/elements/custom-style.js';
+const documentContainer = document.createElement('template');
 
-<!--Shared styles for all charts-->
-<dom-module id="speedment-chart-theme" theme-for="vaadin-chart">
-  <template>
+documentContainer.innerHTML = `
     <style include="vaadin-chart-default-theme">
       :host(.appreciating) .highcharts-color-0, :host(.appreciating) .highcharts-navigator-series {
         fill: #00dd00cc;
@@ -22,5 +22,6 @@
         fill: #ff0000cc;
       }
     </style>
-  </template>
-</dom-module>
+`;
+
+document.head.appendChild(documentContainer.content);

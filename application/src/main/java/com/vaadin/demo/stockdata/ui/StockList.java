@@ -6,6 +6,7 @@ import com.vaadin.demo.stockdata.ui.components.StockGrid;
 import com.vaadin.demo.stockdata.ui.data.StockItem;
 import com.vaadin.demo.stockdata.ui.util.MoneyFormatter;
 import com.vaadin.demo.stockdata.ui.util.ServiceDirectory;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -20,6 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@JsModule("./src/sparkline-chart.js")
 @StyleSheet("frontend://styles/stock-list.css")
 public class StockList extends VerticalLayout {
   public interface SymbolSelectedListener {
@@ -46,7 +48,7 @@ public class StockList extends VerticalLayout {
     searchField.addClassName("search-field");
     searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
     searchField.setPlaceholder("Search by ticker");
-    searchField.setValueChangeMode(ValueChangeMode.EAGER);
+    searchField.setValueChangeMode(ValueChangeMode.LAZY);
 
     // Tell the grid to update based on the new filter
     searchField.addValueChangeListener(event -> {
