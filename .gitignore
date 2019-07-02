@@ -9,3 +9,5 @@ rebel.xml
 **/dependency-reduced-pom.xml
 application/license.txt
 license.txt
+node_modules
+webpack.generated.js
