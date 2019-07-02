@@ -17,15 +17,12 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
-import io.reactivex.disposables.Disposable;
+
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @StyleSheet("frontend://styles/stock-details.css")
@@ -37,7 +34,6 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
   private static final int DATA_POINT_BATCH_SIZE = 300;
 
   private Service service = ServiceDirectory.getServiceInstance();
-  private Disposable subscription;
 
 
   StockDetails() {
@@ -64,13 +60,6 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
     } else {
       showNoSymbolSelected();
     }
-
-    // Todo: Remove when https://github.com/vaadin/vaadin-charts-flow/issues/188 gets fixed
-    addDetachListener(detach -> {
-      if (subscription != null) {
-        subscription.dispose();
-      }
-    });
   }
 
   private void addSymbolDetailsLayout(Symbol symbol) {
@@ -112,8 +101,6 @@ public class StockDetails extends VerticalLayout implements StockList.SymbolSele
   }
 
   private void addDetailChart(Symbol symbol) {
-    if (subscription != null) subscription.dispose();
-
     StockChart chart = new StockChart();
 
     DataSeries dataSeries = new DataSeries();
